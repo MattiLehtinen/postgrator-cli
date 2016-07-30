@@ -1,0 +1,45 @@
+{
+  "name": "postgrator-cli",
+  "version": "0.1.0",
+  "description": "Command line interface for Postgrator",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test/postgrator-cli-tests.js"
+  },
+  "bin": {
+    "postgrator": "./index.js"
+  },
+  "files": [
+    "LICENSE.md",
+    "README.md",
+    "index.js",
+    "postgrator-cli.js",
+    "command-line-options.js"
+  ],
+  "keywords": [
+    "cli",
+    "command",
+    "line",
+    "npm",
+    "scripts",
+    "postgrator",
+    "postgres",
+    "sql",
+    "migrator",
+    "migration",
+    "runner",
+    "mysql",
+    "sql",
+    "server"
+  ],
+  "author": "Matti Lehtinen",
+  "license": "MIT",
+  "dependencies": {
+    "command-line-args": "^3.0.0",
+    "command-line-usage": "^3.0.3",
+    "postgrator": "^2.8.2"
+  },
+  "devDependencies": {
+    "async": "^2.0.1"
+  }
+}
