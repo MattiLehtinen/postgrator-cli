@@ -21,9 +21,9 @@ function run(options, callback) {
         return callback(null);
     }
 
-    if(options.to < 0) {
+    if(!options.to) {
         printUsage();
-        return callback(new Error("Migrate version number must be specified"));
+        return callback(new Error("Migration version number must be specified"));
         // TODO: use latest version if not set
     }
 

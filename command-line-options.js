@@ -53,7 +53,7 @@ const sections = [
     content: {
         options: { columns: [{name: 'one', maxWidth: 200}] },
         data: [        
-            {one: 'postgrator <version> --database=<db> [--driver=<driver>] [--host=<host>] [--port=<port>] [--username=<username>] [--password=<password>]'},
+            {one: 'postgrator <version> [--database=<db>] [--driver=<driver>] [--host=<host>] [--port=<port>] [--username=<username>] [--password=<password>]'},
             {one: 'postgrator <version> --config=<config>'}
         ]
     }

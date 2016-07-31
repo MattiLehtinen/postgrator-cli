@@ -74,7 +74,6 @@ var buildTestsForOptions = function (options) {
 
     tests.push(function (callback) {
         console.log('\n----- testing migration to 003 -----');
-        console.log(options);
         postgratorCli.run(options, function(err, migrations) {
             assert.equal(migrations.length, 3);
             assert.equal(migrations[2].version, 3);
@@ -162,7 +161,35 @@ var buildTestsForOptions = function (options) {
             assert(err.length > 0);
             return callback(null);
         });
+    });
+
+    tests.push(function (callback) {
+        console.log('\n----- testing showing help without any cmd params-----');
+        var originalOptions = options;
+        options = {};
+                
+        console.log = consoleLogCapture;
+        postgratorCli.run(options, function(err, migrations) {
+            options = originalOptions;
+            assert.strictEqual(migrations, undefined)
+            assert.ok(log.indexOf("Examples") >= 0, "No help was displayed");
+            assert.ok(err.message.indexOf("Migration version number must be specified") >= 0, "No migration version error was displayed");
+            return callback();
+        });
     });       
+           
+    tests.push(function (callback) {
+        console.log('\n----- testing showing help without specifying to-----');        
+        options.to = '';
+                
+        console.log = consoleLogCapture;
+        postgratorCli.run(options, function(err, migrations) {
+            assert.strictEqual(migrations, undefined)
+            assert.ok(log.indexOf("Examples") >= 0, "No help was displayed");
+            assert.ok(err.message.indexOf("Migration version number must be specified") >= 0, "No migration version error was displayed");
+            return callback();
+        });
+    });                 
 };
 
 var options = { 
