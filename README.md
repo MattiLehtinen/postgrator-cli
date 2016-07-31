@@ -4,7 +4,7 @@ A command line runner for [Postgrator](https://github.com/rickbergfalk/postgrato
 Supports Postgres, MySQL, and SQL Server.
 
 
-This repository uses [Postgrator](https://github.com/rickbergfalk/postgrator) node.js library developed by [Rick Bergfalk](https://github.com/rickbergfalk) who is not responsible of maintaining this repository.
+This repository uses [Postgrator](https://github.com/rickbergfalk/postgrator) node.js library developed by [Rick Bergfalk](https://github.com/rickbergfalk).
 
 ## Installation
 
@@ -12,7 +12,7 @@ This repository uses [Postgrator](https://github.com/rickbergfalk/postgrator) no
 npm install -g postgrator-cli
 ```
 
-Or if you prefer to use it on npm scripts on package.json:
+Or if you prefer to use it locally on your project using npm scripts of package.json:
 
 ```
 npm install postgrator-cli --save-dev
@@ -49,7 +49,7 @@ you will find it helpful to start with 000s or some large number for file organi
 
 You can specify all the parameters from command line (see below) but the easiest way is to:
 
-1.  Create `postgrator.json` configuration file. Sample:
+* Create `postgrator.json` configuration file. For example:
 
 ```
 {
@@ -63,13 +63,12 @@ You can specify all the parameters from command line (see below) but the easiest
 }
 ```
 
-2.
-Migrate to latest version: 
+* Migrate to latest version (it looks settings by default from `postgrator.json`): 
 ```
 $ postgrator
 ```
 
-Migrate to version 004 (it knows current version and migrates to up or down automatically): 
+* Migrate to version 004 (it knows current version and migrates up/down automatically): 
 ```
 $ postgrator 4
 ```
@@ -78,14 +77,14 @@ $ postgrator 4
 ### Synopsis
 
 ```
-postgrator <version> --database=<db> [--driver=<driver>] [--host=<host>] [--port=<port>] [--username=<username>] [--password=<password>]
-postgrator <version> [--config=<config>]
+postgrator [[--to=]<version>] --database=<db> [--driver=<driver>] [--host=<host>] [--port=<port>] [--username=<username>] [--password=<password>]
+postgrator [[--to=]<version>] [--config=<config>]
 ```
 
 ### Options
 
 ```
-  --to version number                   Version to migrate to
+  --to version                          Version number of the file to migrate to
   -r, --driver pg|mysql|mssql           Database driver. Default: 'pg'
   -h, --host hostname                   Host. Default: '127.0.0.1'
   -o, --port port                       Host. Default: '5432'
@@ -101,7 +100,7 @@ postgrator <version> [--config=<config>]
 
 Examples
 
- 1. Specify parameters on command line                       postgrator 23 --host 127.0.0.1 --database sampledb
+  1. Specify parameters on command line                       postgrator 23 --host 127.0.0.1 --database sampledb
                                                               --username testuser --password testpassword
   2. Use configuration file                                   postgrator 2 --config myConfig.json
   3. Use default configuration file (postgrator.json)         postgrator 5

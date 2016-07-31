@@ -2,8 +2,8 @@ const pjson = require('./package.json');
 
 const optionDefinitions = [    
     { 
-        name: 'to', description: "Version to migrate to",
-        type: String, typeLabel: 'version number', defaultOption: true, defaultValue: ''
+        name: 'to', description: "Version number of the file to migrate to",
+        type: String, typeLabel: 'version', defaultOption: true, defaultValue: ''
     },    
     { 
         name: 'driver', description: "Database driver. Default: 'pg'",
@@ -54,7 +54,7 @@ const sections = [
         options: { columns: [{name: 'one', maxWidth: 200}] },
         data: [        
             {one: 'postgrator [[--to=]version] [--database=<db>] [--driver=<driver>] [--host=<host>] [--port=<port>] [--username=<username>] [--password=<password>]'},
-            {one: 'postgrator [version] [--config=<config>]'}
+            {one: 'postgrator [[--to=]version] [--config=<config>]'}
         ]
     }
   },  

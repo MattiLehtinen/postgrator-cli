@@ -1,6 +1,6 @@
 {
   "name": "postgrator-cli",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Command line interface for Postgrator",
   "author": "Matti Lehtinen <matlehti@gmail.com>",
   "bin": {
@@ -30,6 +30,8 @@
     "runner",
     "mysql",
     "sql",
+    "import",
+    "files",
     "server"
   ],
   "license": "MIT",
