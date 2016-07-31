@@ -54,7 +54,7 @@ const sections = [
         options: { columns: [{name: 'one', maxWidth: 200}] },
         data: [        
             {one: 'postgrator <version> [--database=<db>] [--driver=<driver>] [--host=<host>] [--port=<port>] [--username=<username>] [--password=<password>]'},
-            {one: 'postgrator <version> --config=<config>'}
+            {one: 'postgrator <version> [--config=<config>]'}
         ]
     }
   },  
@@ -67,11 +67,19 @@ const sections = [
     content: [
       {
         desc: '1. Specify parameters on command line',
-        example: 'postgrator 002 --host 127.0.0.1 --database sampledb --username testuser --password testpassword'
+        example: 'postgrator 23 --host 127.0.0.1 --database sampledb --username testuser --password testpassword'
       },
       {
         desc: '2. Use configuration file',
-        example: 'postgrator 002 --config postgrator.json'
+        example: 'postgrator 2 --config myConfig.json'
+      },
+      {
+        desc: '3. Use default configuration file (postgrator.json)',
+        example: 'postgrator 5'
+      },
+      {
+        desc: '4. Migrate to latest version using default configuration file (postgrator.json)',
+        example: 'postgrator'
       },
     ]
   },        

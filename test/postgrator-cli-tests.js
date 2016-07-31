@@ -1,5 +1,6 @@
 const assert = require('assert');
-var async = require('async');
+const async = require('async');
+const fs = require('fs');
 const postgratorCli = require('../postgrator-cli');
 
 const originalConsoleLog = console.log;
@@ -151,6 +152,24 @@ var buildTestsForOptions = function (options) {
     });    
 
     tests.push(function (callback) {
+        console.log('\n----- testing searching default config file (postgrator.json)-----');
+
+        const defaultFile = 'postgrator.json';
+        fs.writeFileSync(defaultFile, fs.readFileSync('test/sample-config.json'));
+
+        options.config = ''
+        options.password = '';
+        options.to = '000';
+
+        postgratorCli.run(options, function(err, migrations) {
+            fs.unlinkSync(defaultFile);         
+            assert.ifError(err);
+            assert(migrations.length > 0);
+            return callback();
+        });
+    });  
+
+    tests.push(function (callback) {
         console.log('\n----- testing empty password-----');
         var originalPassword = options.password;
         options.config = '';
@@ -172,8 +191,8 @@ var buildTestsForOptions = function (options) {
         postgratorCli.run(options, function(err, migrations) {
             options = originalOptions;
             assert.strictEqual(migrations, undefined)
+            assert.ifError(err);
             assert.ok(log.indexOf("Examples") >= 0, "No help was displayed");
-            assert.ok(err.message.indexOf("Migration version number must be specified") >= 0, "No migration version error was displayed");
             return callback();
         });
     });       
@@ -186,7 +205,7 @@ var buildTestsForOptions = function (options) {
         postgratorCli.run(options, function(err, migrations) {
             assert.strictEqual(migrations, undefined)
             assert.ok(log.indexOf("Examples") >= 0, "No help was displayed");
-            assert.ok(err.message.indexOf("Migration version number must be specified") >= 0, "No migration version error was displayed");
+            assert.ifError(err);
             return callback();
         });
     });                 

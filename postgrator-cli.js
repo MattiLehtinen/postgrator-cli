@@ -4,6 +4,7 @@ const postgrator = require('postgrator');
 const pjson = require('./package.json');
 const commandLineOptions = require('./command-line-options');
 
+const defaultConfigFile = 'postgrator.json';
 
 function printUsage() {
     const usage = getUsage(commandLineOptions.sections);
@@ -21,10 +22,19 @@ function run(options, callback) {
         return callback(null);
     }
 
-    if(!options.to) {
-        printUsage();
-        return callback(new Error("Migration version number must be specified"));
-        // TODO: use latest version if not set
+    // Search for default config file if not specified
+    if(!options.config) {
+        try {        
+            fs.accessSync(process.cwd() + '/' + defaultConfigFile, fs.F_OK);
+            options.config = defaultConfigFile;
+        } catch (e) {    
+            // Default config file does not exist.
+            if(!options.to) {
+                printUsage();
+                return callback();
+                // TODO: use latest version if not set
+            }            
+        }        
     }
 
     var config;
