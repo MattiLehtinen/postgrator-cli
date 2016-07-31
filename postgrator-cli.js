@@ -29,7 +29,7 @@ function run(options, callback) {
 
     var config;
     if(options.config) {
-        const configFile = './' + options.config;
+        const configFile = process.cwd() + '/' + options.config;
         try {        
             fs.accessSync(configFile, fs.F_OK);
         } catch (e) {                        

@@ -80,6 +80,11 @@ To run postgrator tests locally, you'll need:
 
 then run `npm test`
 
+## TODO
+* Migrate to latest version if no version number is set
+* Use postgrator.json by default
+* Allow overriding config file parameters from command line
+
 ## License
 
 MIT
