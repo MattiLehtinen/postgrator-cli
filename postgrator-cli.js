@@ -11,6 +11,25 @@ function printUsage() {
     console.log(usage);
 }
 
+function getLatestVersion(migrationDirectory) {
+	var latest = null;
+    var migrationFiles;
+    try {
+    	migrationFiles = fs.readdirSync(migrationDirectory);
+    } catch(e) {
+        // Migration directory not found
+        return false;
+    }
+	migrationFiles.forEach(function(file) {
+		var m = file.split('.');
+		var name = m.length >= 3 ? m.slice(2, m.length - 1).join('.') : file;
+		if (m[m.length - 1] === 'sql') {
+            latest = Math.max(Number(m[0]), latest);
+		}
+	});
+    return latest;
+}
+
 function run(options, callback) {        
     if(options.help) {
         printUsage();
@@ -29,12 +48,21 @@ function run(options, callback) {
             options.config = defaultConfigFile;
         } catch (e) {    
             // Default config file does not exist.
-            if(!options.to) {
-                printUsage();
-                return callback();
-                // TODO: use latest version if not set
-            }            
         }        
+    }
+
+
+    var migrationDirectory = process.cwd() + '/' + options['migration-directory'];
+    var latest = getLatestVersion(migrationDirectory);
+    if(!options.to) {
+        if(!latest) {
+            printUsage();
+        } else {
+            options.to = latest;
+        }                
+    }
+    if(!latest) {
+            return callback(new Error("No migration files found from " + migrationDirectory));        
     }
 
     var config;
@@ -48,7 +76,7 @@ function run(options, callback) {
         config = require(configFile);                       
     } else {
         config = {
-            migrationDirectory: options['migration-directory'],
+            migrationDirectory: migrationDirectory,
             driver: options.driver,
             host: options.host,
             port: options.port,

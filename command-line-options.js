@@ -53,8 +53,8 @@ const sections = [
     content: {
         options: { columns: [{name: 'one', maxWidth: 200}] },
         data: [        
-            {one: 'postgrator <version> [--database=<db>] [--driver=<driver>] [--host=<host>] [--port=<port>] [--username=<username>] [--password=<password>]'},
-            {one: 'postgrator <version> [--config=<config>]'}
+            {one: 'postgrator [[--to=]version] [--database=<db>] [--driver=<driver>] [--host=<host>] [--port=<port>] [--username=<username>] [--password=<password>]'},
+            {one: 'postgrator [version] [--config=<config>]'}
         ]
     }
   },  
@@ -88,8 +88,6 @@ const sections = [
       content: [
           'postgrator-cli v. ' + pjson.version,
           '[underline]{https://github.com/MattiLehtinen/postgrator-cli}',
-          '\n',
-          'postgrator node.js library: [underline]{https://github.com/rickbergfalk/postgrator}',
       ]
   }
 ]
