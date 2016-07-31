@@ -1,15 +1,21 @@
 # Postgrator CLI
 
-A command line runner for Postgrator - A Node.js SQL migration tool using a directory of plain SQL scripts.
+A command line runner for [Postgrator](https://github.com/rickbergfalk/postgrator) - A Node.js SQL migration tool using a directory of plain SQL scripts.
 Supports Postgres, MySQL, and SQL Server.
 
-Postgrator is originally made by *Rick Bergfalk*.    
-If you are looking Postgrator Node.JS library, see [https://github.com/rickbergfalk/postgrator](https://github.com/rickbergfalk/postgrator). 
+
+This repository uses [Postgrator](https://github.com/rickbergfalk/postgrator) node.js library developed by [Rick Bergfalk](https://github.com/rickbergfalk) who is not responsible of maintaining this repository.
 
 ## Installation
 
 ```
 npm install -g postgrator-cli
+```
+
+Or if you prefer to use it on npm scripts on package.json:
+
+```
+npm install postgrator-cli --save-dev
 ```
 
 ## Usage
