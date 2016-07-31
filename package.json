@@ -1,13 +1,13 @@
 {
   "name": "postgrator-cli",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "description": "Command line interface for Postgrator",
-  "main": "index.js",
-  "scripts": {
-    "test": "node test/postgrator-cli-tests.js"
-  },
+  "author": "Matti Lehtinen <matlehti@gmail.com>",
   "bin": {
     "postgrator": "./index.js"
+  },
+  "scripts": {
+    "test": "node test/postgrator-cli-tests.js"
   },
   "files": [
     "LICENSE.md",
@@ -32,7 +32,6 @@
     "sql",
     "server"
   ],
-  "author": "Matti Lehtinen",
   "license": "MIT",
   "dependencies": {
     "command-line-args": "^3.0.0",
