@@ -44,6 +44,10 @@ const optionDefinitions = [
     { 
       name: 'help', description: 'Print this usage guide.',
       alias: '?', type: Boolean
+    },
+    { 
+        name: 'secure', description: "Secure connection (Azure). Default: false",
+        alias: 's', type: Boolean
     }        
 ]
 
