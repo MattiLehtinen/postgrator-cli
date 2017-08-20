@@ -82,7 +82,8 @@ function run(options, callback) {
             port: options.port,
             database: options.database,
             username: options.username,
-            password: options.password
+            password: options.password,
+	    options: { encrypt: true }
         }
     }
 
