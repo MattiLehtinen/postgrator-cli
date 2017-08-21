@@ -1,4 +1,5 @@
 const fs = require('fs');
+const path = require('path');
 const getUsage = require('command-line-usage');
 const postgrator = require('postgrator');
 const pjson = require('./package.json');
@@ -44,7 +45,7 @@ function run(options, callback) {
     // Search for default config file if not specified
     if(!options.config) {
         try {        
-            fs.accessSync(process.cwd() + '/' + defaultConfigFile, fs.F_OK);
+            fs.accessSync(path.join(process.cwd(), defaultConfigFile, fs.F_OK));
             options.config = defaultConfigFile;
         } catch (e) {    
             // Default config file does not exist.
@@ -52,7 +53,7 @@ function run(options, callback) {
     }
 
 
-    var migrationDirectory = process.cwd() + '/' + options['migration-directory'];
+    var migrationDirectory = path.join(process.cwd(), options['migration-directory']);
     var latest = getLatestVersion(migrationDirectory);
     if(!options.to) {
         if(!latest) {
@@ -67,7 +68,7 @@ function run(options, callback) {
 
     var config;
     if(options.config) {
-        const configFile = process.cwd() + '/' + options.config;
+        const configFile = path.join(process.cwd(), options.config);
         try {        
             fs.accessSync(configFile, fs.F_OK);
         } catch (e) {                        
@@ -83,10 +84,9 @@ function run(options, callback) {
             database: options.database,
             username: options.username,
             password: options.password,
-	    options: { encrypt: true }
+	        options: { encrypt: options.secure || false }
         }
     }
-
 
 
     postgrator.setConfig(config);
