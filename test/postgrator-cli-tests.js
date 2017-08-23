@@ -174,7 +174,7 @@ var buildTestsForOptions = function (options) {
         console.log('\n----- testing searching default config file (postgrator.json)-----');
         
         copyConfigToDefaultFile();        
-        options.config = ''
+        options.config = '';
         options.password = '';
         options.to = '000';
 
@@ -204,7 +204,7 @@ var buildTestsForOptions = function (options) {
         console.log('\n----- testing using latest revision with default config file-----');                
         copyConfigToDefaultFile();
         
-        options.config = ''
+        options.config = '';
         options.password = '';
         options.to = '';
 

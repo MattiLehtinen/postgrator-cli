@@ -45,7 +45,7 @@ function run(options, callback) {
     // Search for default config file if not specified
     if(!options.config) {
         try {        
-            fs.accessSync(path.join(process.cwd(), defaultConfigFile, fs.F_OK));
+            fs.accessSync(path.join(process.cwd(), defaultConfigFile), fs.F_OK);
             options.config = defaultConfigFile;
         } catch (e) {    
             // Default config file does not exist.

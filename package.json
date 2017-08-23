@@ -12,7 +12,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/MattiLehtinen/postgrator-cli"
-  },  
+  },
   "files": [
     "LICENSE.md",
     "README.md",
