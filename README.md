@@ -95,6 +95,7 @@ postgrator [[--to=]<version>] [--config=<config>]
   -c, --config file                     Load configuration from a JSON file. With a configuration file you can also
                                         use additional configuration parameters available on postgrator. See syntax
                                         from https://github.com/rickbergfalk/postgrator
+  -s, --secure                          Secure connection (Azure). Default: false                                        
   -v, --version                         Print version.
   -?, --help                            Print this usage guide.
 
