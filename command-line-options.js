@@ -38,17 +38,17 @@ const optionDefinitions = [
         alias: 'c', type: String, typeLabel: '[underline]{file}', 
     },
     { 
+        name: 'secure', description: "Secure connection (Azure). Default: false",
+        alias: 's', type: Boolean
+    },            
+    { 
       name: 'version', description: 'Print version.',
       alias: 'v', type: Boolean
     },    
     { 
       name: 'help', description: 'Print this usage guide.',
       alias: '?', type: Boolean
-    },
-    { 
-        name: 'secure', description: "Secure connection (Azure). Default: false",
-        alias: 's', type: Boolean
-    }        
+    }
 ]
 
 const sections = [
