@@ -8,8 +8,8 @@
   },
   "scripts": {
     "test": "node test/postgrator-cli-tests.js",
-    "prepublishOnly": "true || IF a==a crlf --set=LF bin/*",
-    "postpublish": "true || IF a==a crlf --set=CRLF bin/*"
+    "prepublishOnly": "crlf --set=LF *.js",
+    "restorecrlf": "crlf --set=CRLF *.js"
   },
   "repository": {
     "type": "git",
