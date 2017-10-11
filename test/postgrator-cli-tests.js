@@ -1,6 +1,7 @@
 const assert = require('assert');
 const async = require('async');
 const fs = require('fs');
+const path = require('path');
 const postgratorCli = require('../postgrator-cli');
 
 const originalConsoleLog = console.log;
@@ -33,11 +34,19 @@ var removeVersionTable = function(options, callback) {
 }
 
 var copyConfigToDefaultFile = function() {
-    fs.writeFileSync(defaultConfigFileName, fs.readFileSync('test/sample-config.json'));    
+    copyConfigToFile(defaultConfigFileName);
 }
 
 var deleteDefaultConfigFile = function() {
-    fs.unlinkSync(defaultConfigFileName);    
+    deleteConfigFile(defaultConfigFileName);
+}
+
+var copyConfigToFile = function(file) {
+    fs.writeFileSync(file, fs.readFileSync('test/sample-config.json'));        
+}
+
+var deleteConfigFile = function(file) {
+    fs.unlinkSync(file);        
 }
 
 /* A function to build a set of tests for a given config.
@@ -128,7 +137,7 @@ var buildTestsForOptions = function (options) {
         options.to = '0003';
         options.username = '';
         options.database = '';
-        options.config = 'test/sample-config.json'
+        options.config = 'test/sample-config.json';
 
         postgratorCli.run(options, function(err, migrations) {
             restoreOptions();
@@ -145,7 +154,7 @@ var buildTestsForOptions = function (options) {
         options.to = '02';
         options.username = '';
         options.database = '';
-        options.config = 'test/sample-config.json'
+        options.config = 'test/sample-config.json';
 
         postgratorCli.run(options, function(err, migrations) {
             restoreOptions();            
@@ -159,7 +168,7 @@ var buildTestsForOptions = function (options) {
 
     tests.push(function (callback) {
         console.log('\n----- testing non-existing config file-----');
-        options.config = 'test/config-which-does-not-exist.json'
+        options.config = 'test/config-which-does-not-exist.json';
         options.to = '003';
 
         postgratorCli.run(options, function(err, migrations) {
@@ -219,10 +228,28 @@ var buildTestsForOptions = function (options) {
     }); 
 
     tests.push(function (callback) {
+        console.log('\n----- testing using latest revision with config file set by absolute path-----');                
+        console.log("jooo");
+        let absolutePath = path.resolve(__dirname, './sample-config.json');      
+        console.log(absolutePath);
+        options.config = absolutePath;
+        options.password = '';
+        options.to = '';
+
+        postgratorCli.run(options, function(err, migrations) {
+            restoreOptions();
+            assert.ifError(err);
+            assert.equal(migrations.length, 4)
+            assert.equal(migrations[migrations.length-1].version, 4);
+            return callback();
+        });
+    }); 
+
+    tests.push(function (callback) {
         console.log('\n----- testing with no migration files found-----');        
         options.config = '';
         options.to = 3;
-        options['migration-directory'] = 'migrations' // is this by default;
+        options['migration-directory'] = 'migrations'; // is this by default;
                 
         console.log = consoleLogCapture;
         postgratorCli.run(options, function(err, migrations) {

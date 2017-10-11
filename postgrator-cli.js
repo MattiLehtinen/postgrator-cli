@@ -68,7 +68,7 @@ function run(options, callback) {
 
     var config;
     if(options.config) {
-        const configFile = path.join(process.cwd(), options.config);
+        const configFile = (path.isAbsolute(options.config)) ? options.config : path.join(process.cwd(), options.config);
         try {        
             fs.accessSync(configFile, fs.F_OK);
         } catch (e) {                        
