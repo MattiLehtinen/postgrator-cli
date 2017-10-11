@@ -7,7 +7,9 @@
     "postgrator": "./index.js"
   },
   "scripts": {
-    "test": "node test/postgrator-cli-tests.js"
+    "test": "node test/postgrator-cli-tests.js",
+    "prepublishOnly": "true || IF a==a crlf --set=LF bin/*",
+    "postpublish": "true || IF a==a crlf --set=CRLF bin/*"
   },
   "repository": {
     "type": "git",
@@ -45,6 +47,7 @@
     "postgrator": "^2.8.2"
   },
   "devDependencies": {
-    "async": "^2.0.1"
+    "async": "^2.0.1",
+    "crlf": "^1.1.1"
   }
 }
