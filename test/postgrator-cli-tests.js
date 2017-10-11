@@ -229,9 +229,7 @@ var buildTestsForOptions = function (options) {
 
     tests.push(function (callback) {
         console.log('\n----- testing using latest revision with config file set by absolute path-----');                
-        console.log("jooo");
         let absolutePath = path.resolve(__dirname, './sample-config.json');      
-        console.log(absolutePath);
         options.config = absolutePath;
         options.password = '';
         options.to = '';
@@ -254,7 +252,7 @@ var buildTestsForOptions = function (options) {
         console.log = consoleLogCapture;
         postgratorCli.run(options, function(err, migrations) {
             restoreOptions();
-            assert.strictEqual(migrations, undefined)      
+            assert.strictEqual(migrations, undefined);   
             assert(err.message.indexOf("No migration files found") >= 0);
             assert(log.indexOf("Examples") < 0, "Help was displayed when shouldn't");
             return callback();
