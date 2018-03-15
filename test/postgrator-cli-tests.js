@@ -14,6 +14,15 @@ var consoleLogCapture = function() {
     log += [].slice.call(arguments);    
 };
 
+var promiseToCallback = function(promise, callback){
+    promise
+        .then(function(data) {
+            process.nextTick(callback, null, data);
+        }, function(err) {
+            process.nextTick(callback, err);
+        })
+}
+
 var removeVersionTable = function(options, callback) {
     var config = {
         migrationDirectory: options['migration-directory'],
@@ -25,11 +34,12 @@ var removeVersionTable = function(options, callback) {
         password: options.password
     };    
     console.log('\n----- ' + config.driver + ' removing tables -----');
-    var pg = require('../node_modules/postgrator/postgrator.js');
-    pg.setConfig(config);
-    pg.runQuery('DROP TABLE IF EXISTS schemaversion, animal, person', function (err) {
+    var Postgrator = require('../node_modules/postgrator/postgrator.js');
+    var pg = new Postgrator(config);
+
+    promiseToCallback(pg.runQuery('DROP TABLE IF EXISTS schemaversion, animal, person'), function (err) {
         assert.ifError(err);
-        pg.endConnection(callback);
+        callback(err)
     });
 };
 
@@ -108,12 +118,12 @@ var buildTestsForOptions = function (options) {
 
     tests.push(function (callback) {
         console.log('\n----- testing migration to 000 -----');
-        options.to = "0";
+        options.to = 0;
         postgratorCli.run(options, function(err, migrations) {
             restoreOptions();
             assert.equal(migrations.length, 3);
             assert.equal(migrations[2].version, 1);
-            assert.equal(migrations[2].direction, 'undo');
+            assert.equal(migrations[2].action, 'undo');
             assert.ifError(err);
             return callback();
         });
@@ -126,7 +136,7 @@ var buildTestsForOptions = function (options) {
             restoreOptions();
             assert.equal(migrations.length, 1);
             assert.equal(migrations[0].version, 1);
-            assert.equal(migrations[0].direction, 'do');
+            assert.equal(migrations[0].action, 'do');
             assert.ifError(err);
             return callback();
         });
@@ -141,9 +151,7 @@ var buildTestsForOptions = function (options) {
 
         postgratorCli.run(options, function(err, migrations) {
             restoreOptions();
-            assert.strictEqual(migrations[0].schemaVersionSQL, undefined);
             assert.equal(migrations[migrations.length-1].version, 3);
-            assert.ok(migrations[migrations.length-1].schemaVersionSQL);
             assert.ifError(err);
             return callback();
         });
@@ -158,7 +166,6 @@ var buildTestsForOptions = function (options) {
 
         postgratorCli.run(options, function(err, migrations) {
             restoreOptions();            
-            assert.ok(migrations[0].schemaVersionSQL);
             assert.equal(migrations[0].version, 3);
             assert.equal(migrations[0].action, 'undo');
             assert.ifError(err);
@@ -219,10 +226,9 @@ var buildTestsForOptions = function (options) {
 
         postgratorCli.run(options, function(err, migrations) {
             restoreOptions();
-            deleteDefaultConfigFile();         
+            deleteDefaultConfigFile();
             assert.ifError(err);
-            assert.equal(migrations.length, 4);
-            assert.equal(migrations[migrations.length-1].version, 4);
+            assert.equal(migrations.length, 0);
             return callback();
         });
     }); 
@@ -237,8 +243,7 @@ var buildTestsForOptions = function (options) {
         postgratorCli.run(options, function(err, migrations) {
             restoreOptions();
             assert.ifError(err);
-            assert.equal(migrations.length, 4);
-            assert.equal(migrations[migrations.length-1].version, 4);
+            assert.equal(migrations.length, 0);
             return callback();
         });
     }); 
@@ -287,7 +292,7 @@ var buildTestsForOptions = function (options) {
         postgratorCli.run(options, function(err, migrations) {
             restoreOptions();
             assert.strictEqual(migrations, undefined);
-            assert(err.message.indexOf("No migration files found") >= 0);
+            assert.ok(err);
             assert.ok(log.indexOf("Examples") >= 0, "No help was displayed");
             return callback();
         });

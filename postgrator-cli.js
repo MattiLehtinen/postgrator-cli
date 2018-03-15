@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const getUsage = require('command-line-usage');
-const postgrator = require('postgrator');
+const Postgrator = require('postgrator')
 const pjson = require('./package.json');
 const commandLineOptions = require('./command-line-options');
 
@@ -10,25 +10,6 @@ const defaultConfigFile = 'postgrator.json';
 function printUsage() {
     const usage = getUsage(commandLineOptions.sections);
     console.log(usage);
-}
-
-function getLatestVersion(migrationDirectory) {
-	var latest = null;
-    var migrationFiles;
-    try {
-    	migrationFiles = fs.readdirSync(migrationDirectory);
-    } catch(e) {
-        // Migration directory not found
-        return false;
-    }
-	migrationFiles.forEach(function(file) {
-		var m = file.split('.');
-		var name = m.length >= 3 ? m.slice(2, m.length - 1).join('.') : file;
-		if (m[m.length - 1] === 'sql') {
-            latest = Math.max(Number(m[0]), latest);
-		}
-	});
-    return latest;
 }
 
 function run(options, callback) {        
@@ -54,16 +35,10 @@ function run(options, callback) {
 
 
     var migrationDirectory = path.join(process.cwd(), options['migration-directory']);
-    var latest = getLatestVersion(migrationDirectory);
-    if(!options.to) {
-        if(!latest) {
-            printUsage();
-        } else {
-            options.to = latest;
-        }                
-    }
-    if(!latest) {
-            return callback(new Error("No migration files found from " + migrationDirectory));        
+    if(!options.to && options.to !== 0) {
+        options.to = 'max';
+    }else{
+        options.to = Number(options.to).toString()
     }
 
     var config;
@@ -88,17 +63,70 @@ function run(options, callback) {
         }
     }
 
+    try {
+        var postgrator = new Postgrator(config);
+    } catch (err) {
+        printUsage()
+        return callback(err);
+    }
 
-    postgrator.setConfig(config);
-    postgrator.migrate(options.to, function (err, migrations) {
-        postgrator.endConnection(function () {
-            // connection is closed, or will close in the case of SQL Server
-            if(err && typeof(err) === 'string') {
-                err = new Error(err);    
-            }
-            return callback(err, migrations);                        
-        });
+    postgrator.on('validation-started', migration => logMessage('verifying checksum of migration ' + migration.filename))
+    // postgrator.on('validation-finished', migration => console.log('validation-finished', migration))
+    postgrator.on('migration-started', migration => logMessage('running ' + migration.filename))
+    // postgrator.on('migration-finished', migration => console.log('migration-finished', migration))
+
+    var databaseVersion = null;
+
+    var migratePromise = postgrator.getDatabaseVersion()
+        .catch(function(err){
+            logMessage('table schemaversion does not exist - creating it.')
+            return 0
+        })
+        .then(function(version){
+            databaseVersion = version;
+            logMessage('version of database is: ' + version)
+        })
+        .then(function() {
+            if (options.to === 'max')
+                return postgrator.getMaxVersion()
+            return options.to;
+        })
+        .then(function(version) {
+            logMessage('migrating '+ (version >= databaseVersion? 'up' : 'down') +' to ' + version)
+        }).then(function(){
+            return postgrator.migrate(options.to)
+                .catch(function(err) {
+                    if (err.code === 'ENOENT')
+                        throw new Error("No migration files found from " + migrationDirectory)
+                    throw err
+                })
+        })
+    
+    promiseToCallback(migratePromise, function (err, migrations) {
+        // connection is closed, or will close in the case of SQL Server
+        if(err && typeof(err) === 'string') {
+            err = new Error(err);    
+        }
+        return callback(err, migrations);
     });
 }
 
 module.exports.run = run;
+
+
+////// helpers
+
+var promiseToCallback = function(promise, callback){
+    promise
+        .then(function(data) {
+            process.nextTick(callback, null, data);
+        }, function(err) {
+            process.nextTick(callback, err);
+        })
+}
+
+function logMessage(message){
+    //Using the system default time locale/options for now
+    var messagePrefix = '['+(new Date().toLocaleTimeString())+']';
+    console.log(messagePrefix + ' ' + message);
+}

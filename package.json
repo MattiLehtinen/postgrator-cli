@@ -45,7 +45,10 @@
   "dependencies": {
     "command-line-args": "^4.0.7",
     "command-line-usage": "^4.0.1",
-    "postgrator": "^2.10.3"
+    "mssql": "^4.1.0",
+    "mysql": "^2.15.0",
+    "pg": "^7.4.1",
+    "postgrator": "^3.5.0"
   },
   "devDependencies": {
     "async": "^2.0.1",
