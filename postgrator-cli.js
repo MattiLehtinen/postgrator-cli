@@ -1,7 +1,7 @@
 const fs = require('fs');
 const path = require('path');
 const getUsage = require('command-line-usage');
-const Postgrator = require('postgrator')
+const Postgrator = require('postgrator');
 const pjson = require('./package.json');
 const commandLineOptions = require('./command-line-options');
 
@@ -38,7 +38,7 @@ function run(options, callback) {
     if(!options.to && options.to !== 0) {
         options.to = 'max';
     }else{
-        options.to = Number(options.to).toString()
+        options.to = Number(options.to).toString();
     }
 
     var config;
@@ -66,39 +66,39 @@ function run(options, callback) {
     try {
         var postgrator = new Postgrator(config);
     } catch (err) {
-        printUsage()
+        printUsage();
         return callback(err);
     }
 
-    postgrator.on('validation-started', migration => logMessage('verifying checksum of migration ' + migration.filename))
-    // postgrator.on('validation-finished', migration => console.log('validation-finished', migration))
-    postgrator.on('migration-started', migration => logMessage('running ' + migration.filename))
-    // postgrator.on('migration-finished', migration => console.log('migration-finished', migration))
+    postgrator.on('validation-started', migration => logMessage('verifying checksum of migration ' + migration.filename));
+    postgrator.on('migration-started', migration => logMessage('running ' + migration.filename));
 
     var databaseVersion = null;
 
     var migratePromise = postgrator.getDatabaseVersion()
         .catch(function(err){
-            logMessage('table schemaversion does not exist - creating it.')
-            return 0
+            logMessage('table schemaversion does not exist - creating it.');
+            return 0;
         })
         .then(function(version){
             databaseVersion = version;
-            logMessage('version of database is: ' + version)
+            logMessage('version of database is: ' + version);
         })
         .then(function() {
-            if (options.to === 'max')
-                return postgrator.getMaxVersion()
+            if (options.to === 'max') {
+                return postgrator.getMaxVersion();
+            }
             return options.to;
         })
         .then(function(version) {
-            logMessage('migrating '+ (version >= databaseVersion? 'up' : 'down') +' to ' + version)
+            logMessage('migrating '+ (version >= databaseVersion? 'up' : 'down') +' to ' + version);
         }).then(function(){
             return postgrator.migrate(options.to)
                 .catch(function(err) {
-                    if (err.code === 'ENOENT')
-                        throw new Error("No migration files found from " + migrationDirectory)
-                    throw err
+                    if (err.code === 'ENOENT') {
+                        throw new Error("No migration files found from " + migrationDirectory);
+                    }
+                    throw err;
                 })
         })
     
