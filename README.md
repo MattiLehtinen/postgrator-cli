@@ -18,6 +18,12 @@ Or if you prefer to use it locally on your project using npm scripts of package.
 npm install postgrator-cli --save-dev
 ```
 
+And install the aproprieted drive
+
+```
+npm install <drive>
+```
+
 ## Usage
 
 ### SQL Files
