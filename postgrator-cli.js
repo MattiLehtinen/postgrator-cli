@@ -12,7 +12,7 @@ function printUsage() {
     console.log(usage);
 }
 
-function run(options, callback) {        
+function run(options, callback) { 
     if(options.help) {
         printUsage();
         return callback(null);
@@ -33,11 +33,17 @@ function run(options, callback) {
         }        
     }
 
-
-    var migrationDirectory = path.join(process.cwd(), options['migration-directory']);
+    const migrationDirectory = path.join(process.cwd(), options['migration-directory']);
+    if (!fs.existsSync(migrationDirectory)) {
+        if (options['migration-directory'] === commandLineOptions.DEFAULT_MIGRATION_DIRECTORY) {
+            printUsage();
+        }
+        return callback(new Error(`Directory "${migrationDirectory}" does not exist.`));
+    }
+    
     if(!options.to && options.to !== 0) {
         options.to = 'max';
-    }else{
+    } else {
         options.to = Number(options.to).toString();
     }
 
@@ -60,11 +66,12 @@ function run(options, callback) {
             username: options.username,
             password: options.password,
 	        options: { encrypt: options.secure || false }
-        }
+        };
     }
 
+    let postgrator;
     try {
-        var postgrator = new Postgrator(config);
+        postgrator = new Postgrator(config);
     } catch (err) {
         printUsage();
         return callback(err);
@@ -75,32 +82,29 @@ function run(options, callback) {
 
     var databaseVersion = null;
 
-    var migratePromise = postgrator.getDatabaseVersion()
-        .catch(function(err){
-            logMessage('table schemaversion does not exist - creating it.');
-            return 0;
-        })
-        .then(function(version){
+    var migratePromise = postgrator.getMigrations()
+        .then((migrations) => {
+            if (!migrations || !migrations.length) {
+                throw new Error(`No migration files found from "${migrationDirectory}"`);  
+            }
+        }).then(() => {
+            return postgrator.getDatabaseVersion().catch((err) => {
+                logMessage('table schemaversion does not exist - creating it.');
+                return 0;
+            });
+        }).then((version) =>{
             databaseVersion = version;
             logMessage('version of database is: ' + version);
-        })
-        .then(function() {
+        }).then(() => {
             if (options.to === 'max') {
                 return postgrator.getMaxVersion();
             }
             return options.to;
-        })
-        .then(function(version) {
+        }).then((version) => {
             logMessage('migrating '+ (version >= databaseVersion? 'up' : 'down') +' to ' + version);
-        }).then(function(){
-            return postgrator.migrate(options.to)
-                .catch(function(err) {
-                    if (err.code === 'ENOENT') {
-                        throw new Error("No migration files found from " + migrationDirectory);
-                    }
-                    throw err;
-                })
-        })
+        }).then(() => {
+            return postgrator.migrate(options.to);
+        });
     
     promiseToCallback(migratePromise, function (err, migrations) {
         // connection is closed, or will close in the case of SQL Server

@@ -1,11 +1,15 @@
 const assert = require('assert');
 const async = require('async');
+const commandLineArgs = require('command-line-args');
 const fs = require('fs');
 const path = require('path');
+
+const commandLineOptions = require('../command-line-options');
 const postgratorCli = require('../postgrator-cli');
 
-const originalConsoleLog = console.log;
 const defaultConfigFileName = 'postgrator.json';
+const optionList = commandLineOptions.optionList;
+const originalConsoleLog = console.log;
 
 var tests = [];
 
@@ -84,6 +88,7 @@ var buildTestsForOptions = function (options) {
 
         console.log = consoleLogCapture;
         postgratorCli.run(options, function(err, migrations) {
+            console.log = originalConsoleLog;
             restoreOptions();
             assert.strictEqual(migrations, undefined);
             assert.ok(log.indexOf("Examples") >= 0, "No help was displayed");
@@ -98,6 +103,7 @@ var buildTestsForOptions = function (options) {
                 
         console.log = consoleLogCapture;
         postgratorCli.run(options, function(err, migrations) {
+            console.log = originalConsoleLog;            
             restoreOptions();
             assert.strictEqual(migrations, undefined);
             assert.ok(log.indexOf('Version: ') >= 0, "No version was displayed");
@@ -252,17 +258,37 @@ var buildTestsForOptions = function (options) {
         console.log('\n----- testing with no migration files found-----');        
         options.config = '';
         options.to = 3;
-        options['migration-directory'] = 'migrations'; // is this by default;
+        options['migration-directory'] = 'test/empty-migrations';
                 
         console.log = consoleLogCapture;
         postgratorCli.run(options, function(err, migrations) {
+            console.log = originalConsoleLog;            
             restoreOptions();
-            assert.strictEqual(migrations, undefined);   
+            assert(err, "No error when there should be");
             assert(err.message.indexOf("No migration files found") >= 0);
+            assert.strictEqual(migrations, undefined);   
             assert(log.indexOf("Examples") < 0, "Help was displayed when shouldn't");
             return callback();
         });
     }); 
+
+    tests.push(function (callback) {
+        console.log('\n----- testing with non-existing migration directory set-----');        
+        options.config = '';
+        options.to = 3;
+        options['migration-directory'] = 'test/non-existing-directory';
+                
+        console.log = consoleLogCapture;
+        postgratorCli.run(options, function(err, migrations) {
+            console.log = originalConsoleLog;           
+            console.log(log); 
+            restoreOptions();
+            assert(err.message.indexOf("does not exist") >= 0);
+            assert(log.indexOf("Examples") < 0, "Help was displayed when shouldn't");
+            assert.strictEqual(migrations, undefined);   
+            return callback();
+        });
+    });    
 
     tests.push(function (callback) {
         console.log('\n----- testing empty password-----');
@@ -278,25 +304,20 @@ var buildTestsForOptions = function (options) {
     });   
 
     tests.push(function (callback) {
-        console.log('\n----- testing showing help without any cmd params-----');        
-        options = {
-            to: '',
-            database: '',
-            username: '',
-            password: '',
-            config: '',
-            'migration-directory': 'migrations' // is set by default to this
-        };
+        console.log('\n----- testing showing help and error without any cmd params if no migrations directory-----');        
+        const defaultOptions = commandLineArgs(optionList, { partial: true });
                 
         console.log = consoleLogCapture;
-        postgratorCli.run(options, function(err, migrations) {
+        postgratorCli.run(defaultOptions, function(err, migrations) {
+            console.log = originalConsoleLog;   
             restoreOptions();
             assert.strictEqual(migrations, undefined);
-            assert.ok(err);
             assert.ok(log.indexOf("Examples") >= 0, "No help was displayed");
+            assert(err.message.indexOf("does not exist") >= 0, "No directory does not exist error was displayed");
             return callback();
         });
-    });                  
+    });     
+         
 };
 
 var options = { 
@@ -322,6 +343,7 @@ async.eachSeries(tests, function(testFunc, callback) {
 	testFunc(callback);
 }, function (err) { 
     if(err) {
+        console.log = originalConsoleLog;
         console.log(err);
     	assert.ifError(err);
     } 

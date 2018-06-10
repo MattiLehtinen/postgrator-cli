@@ -1,0 +1,1 @@
+An empty directory with some other file for testing scenario where no migration files are found
