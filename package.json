@@ -9,7 +9,8 @@
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint",
-    "test": "node test/postgrator-cli-tests.js",
+    "test": "npm run tests",
+    "tests": "node test/postgrator-cli-tests.js",
     "prepublishOnly": "crlf --set=LF *.js",
     "postpublish": "echo execute 'npm run restorecrlf' if in windows and using crlf line endings.",
     "restorecrlf": "crlf --set=CRLF *.js"

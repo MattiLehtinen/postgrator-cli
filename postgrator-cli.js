@@ -52,15 +52,6 @@ function run(options, callback) {
         }
     }
 
-    const migrationDirectory = path.join(process.cwd(), options['migration-directory']);
-    if (!fs.existsSync(migrationDirectory)) {
-        if (options['migration-directory'] === commandLineOptions.DEFAULT_MIGRATION_DIRECTORY) {
-            printUsage();
-        }
-        callback(new Error(`Directory "${migrationDirectory}" does not exist.`));
-        return;
-    }
-
     if (!options.to && options.to !== 0) {
         options.to = 'max';
     }
@@ -83,7 +74,7 @@ function run(options, callback) {
         config = require(configFile);
     } else {
         config = {
-            migrationDirectory,
+            migrationDirectory: options['migration-directory'],
             driver: options.driver,
             host: options.host,
             port: options.port,
@@ -92,6 +83,20 @@ function run(options, callback) {
             password: options.password,
             options: { encrypt: options.secure || false },
         };
+    }
+    if (!config.migrationDirectory) {
+        config.migrationDirectory = commandLineOptions.DEFAULT_MIGRATION_DIRECTORY;
+    }
+    if (!path.isAbsolute(config.migrationDirectory)) {
+        config.migrationDirectory = path.join(process.cwd(), config.migrationDirectory);
+    }
+
+    if (!fs.existsSync(config.migrationDirectory)) {
+        if (!options.config && options['migration-directory'] === commandLineOptions.DEFAULT_MIGRATION_DIRECTORY) {
+            printUsage();
+        }
+        callback(new Error(`Directory "${config.migrationDirectory}" does not exist.`));
+        return;
     }
 
     let postgrator;
@@ -111,7 +116,7 @@ function run(options, callback) {
     const migratePromise = postgrator.getMigrations()
         .then((migrations) => {
             if (!migrations || !migrations.length) {
-                throw new Error(`No migration files found from "${migrationDirectory}"`);
+                throw new Error(`No migration files found from "${config.migrationDirectory}"`);
             }
         })
         .then(() => {

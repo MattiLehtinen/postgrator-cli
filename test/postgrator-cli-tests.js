@@ -81,9 +81,11 @@ function buildTestsForOptions(options) {
 
     function resetMigrations(callback) {
         console.log('\n----- Reset migrations-----');
+        const originalTo = options.to;
         options.to = 0;
         postgratorCli.run(options, (err) => {
             assert.ifError(err);
+            options.to = originalTo;
             return callback();
         });
     }
@@ -313,12 +315,48 @@ function buildTestsForOptions(options) {
         console.log = consoleLogCapture;
         postgratorCli.run(options, (err, migrations) => {
             console.log = originalConsoleLog;
-            console.log(log);
             restoreOptions();
             assert(err.message.indexOf('does not exist') >= 0);
             assert(log.indexOf('Examples') < 0, "Help was displayed when shouldn't");
             assert.strictEqual(migrations, undefined);
             return callback();
+        });
+    });
+
+    tests.push((callback) => {
+        console.log('\n----- testing with non-existing migration directory set in config file-----');
+        options.username = '';
+        options.database = '';
+        options.config = 'test/config-with-non-existing-directory.json';
+
+        console.log = consoleLogCapture;
+        postgratorCli.run(options, (err, migrations) => {
+            console.log = originalConsoleLog;
+            restoreOptions();
+            assert(err.message.indexOf('non-existing-migrations-directory') >= 0);
+            assert(err.message.indexOf('does not exist') >= 0);
+            assert(log.indexOf('Examples') < 0, "Help was displayed when shouldn't");
+            assert.strictEqual(migrations, undefined);
+            return callback();
+        });
+    });
+
+    tests.push(resetMigrations);
+
+    tests.push((callback) => {
+        console.log('\n----- testing with alternative migration directory set in config file-----');
+        options.to = 'max';
+        options.username = '';
+        options.database = '';
+        options.config = 'test/config-with-other-directory.json';
+
+        postgratorCli.run(options, (err, migrations) => {
+            assert.ifError(err);
+            assert(migrations.length, 2);
+            return resetMigrations(() => {
+                restoreOptions();
+                callback();
+            });
         });
     });
 
