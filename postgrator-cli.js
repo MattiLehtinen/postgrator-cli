@@ -43,7 +43,8 @@ function run(options, callback) {
     
     if (!options.to && options.to !== 0) {
         options.to = 'max';
-    } else {
+    } 
+    if (options.to !== 'max') {
         options.to = Number(options.to).toString();
     }
 
