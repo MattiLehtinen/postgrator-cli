@@ -1,11 +1,15 @@
 const assert = require('assert');
 const async = require('async');
+const commandLineArgs = require('command-line-args');
 const fs = require('fs');
 const path = require('path');
+
+const commandLineOptions = require('../command-line-options');
 const postgratorCli = require('../postgrator-cli');
 
-const originalConsoleLog = console.log;
 const defaultConfigFileName = 'postgrator.json';
+const optionList = commandLineOptions.optionList;
+const originalConsoleLog = console.log;
 
 var tests = [];
 
@@ -13,6 +17,15 @@ var log = '';
 var consoleLogCapture = function() {
     log += [].slice.call(arguments);    
 };
+
+var promiseToCallback = function(promise, callback){
+    promise
+        .then(function(data) {
+            process.nextTick(callback, null, data);
+        }, function(err) {
+            process.nextTick(callback, err);
+        })
+}
 
 var removeVersionTable = function(options, callback) {
     var config = {
@@ -25,11 +38,12 @@ var removeVersionTable = function(options, callback) {
         password: options.password
     };    
     console.log('\n----- ' + config.driver + ' removing tables -----');
-    var pg = require('../node_modules/postgrator/postgrator.js');
-    pg.setConfig(config);
-    pg.runQuery('DROP TABLE IF EXISTS schemaversion, animal, person', function (err) {
+    var Postgrator = require('../node_modules/postgrator/postgrator.js');
+    var pg = new Postgrator(config);
+
+    promiseToCallback(pg.runQuery('DROP TABLE IF EXISTS schemaversion, animal, person'), function (err) {
         assert.ifError(err);
-        pg.endConnection(callback);
+        callback(err)
     });
 };
 
@@ -49,6 +63,11 @@ var deleteConfigFile = function(file) {
     fs.unlinkSync(file);        
 };
 
+var getDefaultOptions = () => {
+    return commandLineArgs(optionList, { partial: true });
+};
+
+
 /* A function to build a set of tests for a given config.
    This will be helpful when we want to run the same kinds of tests on
    postgres, mysql, sql server, etc.
@@ -59,6 +78,15 @@ var buildTestsForOptions = function (options) {
 
     var restoreOptions = function() {
         options = JSON.parse(JSON.stringify(originalOptions));
+    };
+
+    var resetMigrations = (callback) => {
+        console.log('\n----- Reset migrations-----');      
+        options.to = 0;  
+        postgratorCli.run(options, (err, migrations) => {
+            assert.ifError(err);
+            return callback();
+        });
     };
 
     tests.push(function(callback) {
@@ -74,6 +102,7 @@ var buildTestsForOptions = function (options) {
 
         console.log = consoleLogCapture;
         postgratorCli.run(options, function(err, migrations) {
+            console.log = originalConsoleLog;
             restoreOptions();
             assert.strictEqual(migrations, undefined);
             assert.ok(log.indexOf("Examples") >= 0, "No help was displayed");
@@ -88,6 +117,7 @@ var buildTestsForOptions = function (options) {
                 
         console.log = consoleLogCapture;
         postgratorCli.run(options, function(err, migrations) {
+            console.log = originalConsoleLog;            
             restoreOptions();
             assert.strictEqual(migrations, undefined);
             assert.ok(log.indexOf('Version: ') >= 0, "No version was displayed");
@@ -108,12 +138,12 @@ var buildTestsForOptions = function (options) {
 
     tests.push(function (callback) {
         console.log('\n----- testing migration to 000 -----');
-        options.to = "0";
+        options.to = 0;
         postgratorCli.run(options, function(err, migrations) {
             restoreOptions();
             assert.equal(migrations.length, 3);
             assert.equal(migrations[2].version, 1);
-            assert.equal(migrations[2].direction, 'undo');
+            assert.equal(migrations[2].action, 'undo');
             assert.ifError(err);
             return callback();
         });
@@ -126,7 +156,7 @@ var buildTestsForOptions = function (options) {
             restoreOptions();
             assert.equal(migrations.length, 1);
             assert.equal(migrations[0].version, 1);
-            assert.equal(migrations[0].direction, 'do');
+            assert.equal(migrations[0].action, 'do');
             assert.ifError(err);
             return callback();
         });
@@ -141,9 +171,7 @@ var buildTestsForOptions = function (options) {
 
         postgratorCli.run(options, function(err, migrations) {
             restoreOptions();
-            assert.strictEqual(migrations[0].schemaVersionSQL, undefined);
             assert.equal(migrations[migrations.length-1].version, 3);
-            assert.ok(migrations[migrations.length-1].schemaVersionSQL);
             assert.ifError(err);
             return callback();
         });
@@ -158,7 +186,6 @@ var buildTestsForOptions = function (options) {
 
         postgratorCli.run(options, function(err, migrations) {
             restoreOptions();            
-            assert.ok(migrations[0].schemaVersionSQL);
             assert.equal(migrations[0].version, 3);
             assert.equal(migrations[0].action, 'undo');
             assert.ifError(err);
@@ -198,8 +225,8 @@ var buildTestsForOptions = function (options) {
 
     tests.push(function (callback) {
         console.log('\n----- testing using latest revision without specifying to-----');        
-        options.to = '';
-                
+        options.to = getDefaultOptions().to;    // is 'max'     
+
         postgratorCli.run(options, function(err, migrations) {
             restoreOptions();
             assert.ifError(err);
@@ -208,6 +235,8 @@ var buildTestsForOptions = function (options) {
             return callback();
         });
     });                 
+
+    tests.push(resetMigrations);
 
     tests.push(function (callback) {
         console.log('\n----- testing using latest revision with default config file-----');                
@@ -219,13 +248,14 @@ var buildTestsForOptions = function (options) {
 
         postgratorCli.run(options, function(err, migrations) {
             restoreOptions();
-            deleteDefaultConfigFile();         
+            deleteDefaultConfigFile();
             assert.ifError(err);
             assert.equal(migrations.length, 4);
-            assert.equal(migrations[migrations.length-1].version, 4);
             return callback();
         });
     }); 
+
+    tests.push(resetMigrations);
 
     tests.push(function (callback) {
         console.log('\n----- testing using latest revision with config file set by absolute path-----');                
@@ -238,7 +268,21 @@ var buildTestsForOptions = function (options) {
             restoreOptions();
             assert.ifError(err);
             assert.equal(migrations.length, 4);
-            assert.equal(migrations[migrations.length-1].version, 4);
+            return callback();
+        });
+    }); 
+
+    tests.push(function (callback) {
+        console.log('\n----- testing it does not re-apply same migrations -----');                
+        let absolutePath = path.resolve(__dirname, './sample-config.json');      
+        options.config = absolutePath;
+        options.password = '';
+        options.to = '';
+
+        postgratorCli.run(options, function(err, migrations) {
+            restoreOptions();
+            assert.ifError(err);
+            assert.equal(migrations.length, 0); // returns number of applied migrations
             return callback();
         });
     }); 
@@ -247,17 +291,37 @@ var buildTestsForOptions = function (options) {
         console.log('\n----- testing with no migration files found-----');        
         options.config = '';
         options.to = 3;
-        options['migration-directory'] = 'migrations'; // is this by default;
+        options['migration-directory'] = 'test/empty-migrations';
                 
         console.log = consoleLogCapture;
         postgratorCli.run(options, function(err, migrations) {
+            console.log = originalConsoleLog;            
             restoreOptions();
-            assert.strictEqual(migrations, undefined);   
+            assert(err, "No error when there should be");
             assert(err.message.indexOf("No migration files found") >= 0);
+            assert.strictEqual(migrations, undefined);   
             assert(log.indexOf("Examples") < 0, "Help was displayed when shouldn't");
             return callback();
         });
     }); 
+
+    tests.push(function (callback) {
+        console.log('\n----- testing with non-existing migration directory set-----');        
+        options.config = '';
+        options.to = 3;
+        options['migration-directory'] = 'test/non-existing-directory';
+                
+        console.log = consoleLogCapture;
+        postgratorCli.run(options, function(err, migrations) {
+            console.log = originalConsoleLog;           
+            console.log(log); 
+            restoreOptions();
+            assert(err.message.indexOf("does not exist") >= 0);
+            assert(log.indexOf("Examples") < 0, "Help was displayed when shouldn't");
+            assert.strictEqual(migrations, undefined);   
+            return callback();
+        });
+    });    
 
     tests.push(function (callback) {
         console.log('\n----- testing empty password-----');
@@ -273,25 +337,20 @@ var buildTestsForOptions = function (options) {
     });   
 
     tests.push(function (callback) {
-        console.log('\n----- testing showing help without any cmd params-----');        
-        options = {
-            to: '',
-            database: '',
-            username: '',
-            password: '',
-            config: '',
-            'migration-directory': 'migrations' // is set by default to this
-        };
+        console.log('\n----- testing showing help and error without any cmd params if no migrations directory-----');        
+        const defaultOptions = getDefaultOptions();
                 
         console.log = consoleLogCapture;
-        postgratorCli.run(options, function(err, migrations) {
+        postgratorCli.run(defaultOptions, function(err, migrations) {
+            console.log = originalConsoleLog;   
             restoreOptions();
             assert.strictEqual(migrations, undefined);
-            assert(err.message.indexOf("No migration files found") >= 0);
             assert.ok(log.indexOf("Examples") >= 0, "No help was displayed");
+            assert(err.message.indexOf("does not exist") >= 0, "No directory does not exist error was displayed");
             return callback();
         });
-    });                  
+    });     
+         
 };
 
 var options = { 
@@ -317,6 +376,7 @@ async.eachSeries(tests, function(testFunc, callback) {
 	testFunc(callback);
 }, function (err) { 
     if(err) {
+        console.log = originalConsoleLog;
         console.log(err);
     	assert.ifError(err);
     } 

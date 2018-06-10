@@ -1,6 +1,6 @@
 {
   "name": "postgrator-cli",
-  "version": "0.2.2",
+  "version": "3.0.0",
   "description": "Command line interface for Postgrator",
   "author": "Matti Lehtinen <matlehti@gmail.com> (https://twitter.com/MattiLehtinen)",
   "bin": {
@@ -44,11 +44,12 @@
   "license": "MIT",
   "dependencies": {
     "command-line-args": "^4.0.7",
-    "command-line-usage": "^4.0.1",
-    "postgrator": "^2.10.3"
+    "command-line-usage": "^4.1.0",
+    "postgrator": "^3.6.0"
   },
   "devDependencies": {
-    "async": "^2.0.1",
-    "crlf": "^1.1.1"
+    "async": "^2.6.1",
+    "crlf": "^1.1.1",
+    "pg": "^7.4.3"
   }
 }

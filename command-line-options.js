@@ -1,9 +1,11 @@
 const pjson = require('./package.json');
 
+const DEFAULT_MIGRATION_DIRECTORY = "migrations";
+
 const optionDefinitions = [    
     { 
-        name: 'to', description: "Version number of the file to migrate to",
-        type: String, typeLabel: 'version', defaultOption: true, defaultValue: ''
+        name: 'to', description: "Version number of the file to migrate to or 'max'. Default: 'max'",
+        type: String, typeLabel: 'version', defaultOption: true, defaultValue: 'max'
     },    
     { 
         name: 'driver', description: "Database driver. Default: 'pg'",
@@ -94,7 +96,8 @@ const sections = [
           '[underline]{https://github.com/MattiLehtinen/postgrator-cli}',
       ]
   }
-]
+];
 
 module.exports.sections = sections;
 module.exports.optionList = optionDefinitions;
+module.exports.DEFAULT_MIGRATION_DIRECTORY = DEFAULT_MIGRATION_DIRECTORY;

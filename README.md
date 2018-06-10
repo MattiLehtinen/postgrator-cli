@@ -18,6 +18,16 @@ Or if you prefer to use it locally on your project using npm scripts of package.
 npm install postgrator-cli --save-dev
 ```
 
+And install the appropriate DB engine(s) if not installed yet:
+
+```
+npm install pg@7
+npm install mysql@2
+npm install mssql@4
+```
+
+See the [Postgrator](https://github.com/rickbergfalk/postgrator) documentation for more information about the supported engines.
+
 ## Usage
 
 ### SQL Files
@@ -84,7 +94,7 @@ postgrator [[--to=]<version>] [--config=<config>]
 ### Options
 
 ```
-  --to version                          Version number of the file to migrate to
+  --to version                          Version number of the file to migrate to or 'max'. Default: 'max'
   -r, --driver pg|mysql|mssql           Database driver. Default: 'pg'
   -h, --host hostname                   Host. Default: '127.0.0.1'
   -o, --port port                       Host. Default: '5432'
@@ -117,6 +127,12 @@ then run `npm test`
 
 ## TODO
 * Allow overriding config file parameters from command line
+
+## Release notes
+
+### 3.0.0 
+#### Not released yet
+Breaking changes. Upgraded for Postgrator 3.
 
 ## License
 
