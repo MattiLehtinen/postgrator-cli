@@ -41,7 +41,7 @@ function run(options, callback) {
         return callback(new Error(`Directory "${migrationDirectory}" does not exist.`));
     }
     
-    if(!options.to && options.to !== 0) {
+    if (!options.to && options.to !== 0) {
         options.to = 'max';
     } else {
         options.to = Number(options.to).toString();

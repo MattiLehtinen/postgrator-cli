@@ -63,6 +63,10 @@ var deleteConfigFile = function(file) {
     fs.unlinkSync(file);        
 };
 
+var getDefaultOptions = function() {
+    return commandLineArgs(optionList, { partial: true });
+};
+
 /* A function to build a set of tests for a given config.
    This will be helpful when we want to run the same kinds of tests on
    postgres, mysql, sql server, etc.
@@ -211,8 +215,8 @@ var buildTestsForOptions = function (options) {
 
     tests.push(function (callback) {
         console.log('\n----- testing using latest revision without specifying to-----');        
-        options.to = '';
-                
+        options.to = getDefaultOptions().to;    // is 'max'     
+
         postgratorCli.run(options, function(err, migrations) {
             restoreOptions();
             assert.ifError(err);
@@ -305,7 +309,7 @@ var buildTestsForOptions = function (options) {
 
     tests.push(function (callback) {
         console.log('\n----- testing showing help and error without any cmd params if no migrations directory-----');        
-        const defaultOptions = commandLineArgs(optionList, { partial: true });
+        const defaultOptions = getDefaultOptions();
                 
         console.log = consoleLogCapture;
         postgratorCli.run(defaultOptions, function(err, migrations) {

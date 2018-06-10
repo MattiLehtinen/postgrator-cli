@@ -94,7 +94,7 @@ postgrator [[--to=]<version>] [--config=<config>]
 ### Options
 
 ```
-  --to version                          Version number of the file to migrate to
+  --to version                          Version number of the file to migrate to or 'max'. Default: 'max'
   -r, --driver pg|mysql|mssql           Database driver. Default: 'pg'
   -h, --host hostname                   Host. Default: '127.0.0.1'
   -o, --port port                       Host. Default: '5432'
