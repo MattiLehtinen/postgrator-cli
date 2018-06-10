@@ -1,0 +1,20 @@
+{
+    "extends": "airbnb-base",
+
+    "env": {
+        "es6": true,
+        "node": true,
+        "browser": false
+    },
+
+    "rules": {
+        "arrow-body-style": "off",
+        "comma-dangle": ["error", "always-multiline"],
+        "global-require": "off",
+        "indent": ["warn", 4],
+        "linebreak-style": "off",
+        "no-console": "off",
+        "import/no-dynamic-require": "off",
+        "no-param-reassign": "off"
+    }
+}

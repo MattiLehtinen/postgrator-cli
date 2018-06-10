@@ -1,0 +1,14 @@
+{
+    "eslint.enable": true,
+    "jshint.enable": false,
+
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+
+    "files.trimTrailingWhitespace": true,
+
+    // Configure glob patterns for excluding files and folders in searches. Inherits all glob patterns from the files.exclude setting.
+    "search.exclude": {
+        "**/node_modules": true
+    },
+}
