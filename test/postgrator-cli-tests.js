@@ -63,9 +63,10 @@ var deleteConfigFile = function(file) {
     fs.unlinkSync(file);        
 };
 
-var getDefaultOptions = function() {
+var getDefaultOptions = () => {
     return commandLineArgs(optionList, { partial: true });
 };
+
 
 /* A function to build a set of tests for a given config.
    This will be helpful when we want to run the same kinds of tests on
@@ -77,6 +78,15 @@ var buildTestsForOptions = function (options) {
 
     var restoreOptions = function() {
         options = JSON.parse(JSON.stringify(originalOptions));
+    };
+
+    var resetMigrations = (callback) => {
+        console.log('\n----- Reset migrations-----');      
+        options.to = 0;  
+        postgratorCli.run(options, (err, migrations) => {
+            assert.ifError(err);
+            return callback();
+        });
     };
 
     tests.push(function(callback) {
@@ -226,6 +236,8 @@ var buildTestsForOptions = function (options) {
         });
     });                 
 
+    tests.push(resetMigrations);
+
     tests.push(function (callback) {
         console.log('\n----- testing using latest revision with default config file-----');                
         copyConfigToDefaultFile();
@@ -238,10 +250,12 @@ var buildTestsForOptions = function (options) {
             restoreOptions();
             deleteDefaultConfigFile();
             assert.ifError(err);
-            assert.equal(migrations.length, 0);
+            assert.equal(migrations.length, 4);
             return callback();
         });
     }); 
+
+    tests.push(resetMigrations);
 
     tests.push(function (callback) {
         console.log('\n----- testing using latest revision with config file set by absolute path-----');                
@@ -253,7 +267,22 @@ var buildTestsForOptions = function (options) {
         postgratorCli.run(options, function(err, migrations) {
             restoreOptions();
             assert.ifError(err);
-            assert.equal(migrations.length, 0);
+            assert.equal(migrations.length, 4);
+            return callback();
+        });
+    }); 
+
+    tests.push(function (callback) {
+        console.log('\n----- testing it does not re-apply same migrations -----');                
+        let absolutePath = path.resolve(__dirname, './sample-config.json');      
+        options.config = absolutePath;
+        options.password = '';
+        options.to = '';
+
+        postgratorCli.run(options, function(err, migrations) {
+            restoreOptions();
+            assert.ifError(err);
+            assert.equal(migrations.length, 0); // returns number of applied migrations
             return callback();
         });
     }); 
