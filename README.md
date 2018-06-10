@@ -18,11 +18,15 @@ Or if you prefer to use it locally on your project using npm scripts of package.
 npm install postgrator-cli --save-dev
 ```
 
-And install the appropriate driver package
+And install the appropriate DB engine(s) if not installed yet:
 
 ```
-npm install <driver>
+npm install pg@7
+npm install mysql@2
+npm install mssql@4
 ```
+
+See the [Postgrator](https://github.com/rickbergfalk/postgrator) documentation for more information about the supported engines.
 
 ## Usage
 
@@ -123,6 +127,12 @@ then run `npm test`
 
 ## TODO
 * Allow overriding config file parameters from command line
+
+## Release notes
+
+### 3.0.0 
+#### Not released yet
+Breaking changes. Upgraded for Postgrator 3.
 
 ## License
 
