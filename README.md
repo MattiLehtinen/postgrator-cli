@@ -73,16 +73,16 @@ You can specify all the parameters from command line (see below) but the easiest
 }
 ```
 
-* Migrate to latest version (it looks settings by default from `postgrator.json`): 
+* Migrate to latest version (it looks settings by default from `postgrator.json`):
 ```
 $ postgrator
 ```
 
-* Migrate to version 004 (it knows current version and migrates up/down automatically): 
+* Migrate to version 004 (it knows current version and migrates up/down automatically):
 ```
 $ postgrator 4
 ```
-     
+
 
 ### Synopsis
 
@@ -105,7 +105,7 @@ postgrator [[--to=]<version>] [--config=<config>]
   -c, --config file                     Load configuration from a JSON file. With a configuration file you can also
                                         use additional configuration parameters available on postgrator. See syntax
                                         from https://github.com/rickbergfalk/postgrator
-  -s, --secure                          Secure connection (Azure). Default: false                                        
+  -s, --secure                          Secure connection (Azure). Default: false
   -v, --version                         Print version.
   -?, --help                            Print this usage guide.
 
@@ -130,9 +130,9 @@ then run `npm test`
 
 ## Release notes
 
-### 3.0.0 
-#### Not released yet
-Breaking changes. Upgraded for Postgrator 3.
+### 3.0.0
+#### 1.7.2018
+Upgraded for Postgrator 3.
 
 ## License
 
