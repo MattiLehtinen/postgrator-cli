@@ -40,9 +40,9 @@ function getConflictingMigrations(migrations) {
 }
 
 function areConflictingMigrations(migrationA, migrationB) {
-    return migrationA.action === migrationB.action &&
-        migrationA.version === migrationB.version &&
-        migrationA.filename !== migrationB.filename;
+    return migrationA.action === migrationB.action
+        && migrationA.version === migrationB.version
+        && migrationA.filename !== migrationB.filename;
 }
 
 function getMigrationFileNames(migrations) {
@@ -83,9 +83,9 @@ function run(commandLineArgs, callback) {
 
     let postgratorConfig;
     if (commandLineArgs.config) {
-        const configFile = (path.isAbsolute(commandLineArgs.config)) ?
-            commandLineArgs.config :
-            path.join(process.cwd(), commandLineArgs.config);
+        const configFile = (path.isAbsolute(commandLineArgs.config))
+            ? commandLineArgs.config
+            : path.join(process.cwd(), commandLineArgs.config);
 
         try {
             fs.accessSync(configFile, fs.F_OK);
