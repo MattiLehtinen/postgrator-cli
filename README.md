@@ -102,10 +102,12 @@ postgrator [[--to=]<version>] [--config=<config>]
   -u, --username database               Username
   -p, --password password               Password
   -m, --migration-directory directory   A directory to run migration files from. Default: 'migrations''
+  -t, --detect-version-conflicts        Show an error and do not run any migrations if there are multiple migration
+                                        files with same version number
+  -s, --secure                          Secure connection (Azure). Default: false
   -c, --config file                     Load configuration from a JSON file. With a configuration file you can also
                                         use additional configuration parameters available on postgrator. See syntax
                                         from https://github.com/rickbergfalk/postgrator
-  -s, --secure                          Secure connection (Azure). Default: false
   -v, --version                         Print version.
   -?, --help                            Print this usage guide.
 
@@ -130,9 +132,13 @@ then run `npm test`
 
 ## Release notes
 
+### 3.1.0
+#### Not released yet
+* Added option `detect-version-conflicts` to detect if there are multiple migration files with same version number.
+
 ### 3.0.0
 #### 1.7.2018
-Upgraded for Postgrator 3.
+* Upgraded for Postgrator 3.
 
 ## License
 

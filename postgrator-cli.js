@@ -7,12 +7,11 @@ const commandLineOptions = require('./command-line-options');
 
 const defaultConfigFile = 'postgrator.json';
 
-/* --- Helpers --- */
-
 function printUsage() {
     const usage = getUsage(commandLineOptions.sections);
     console.log(usage);
 }
+
 function promiseToCallback(promise, callback) {
     promise.then((data) => {
         process.nextTick(callback, null, data);
@@ -27,43 +26,66 @@ function logMessage(message) {
     console.log(`${messagePrefix} ${message}`);
 }
 
-/* --- Main --- */
+function getConflictingMigrations(migrations) {
+    let conflictingMigrations = [];
 
-function run(options, callback) {
-    if (options.help) {
+    migrations.forEach((migrationA) => {
+        const newConflicting = migrations.filter((migrationB) => {
+            return areConflictingMigrations(migrationA, migrationB);
+        });
+        conflictingMigrations = conflictingMigrations.concat(newConflicting);
+    });
+
+    return conflictingMigrations;
+}
+
+function areConflictingMigrations(migrationA, migrationB) {
+    return migrationA.action === migrationB.action &&
+        migrationA.version === migrationB.version &&
+        migrationA.filename !== migrationB.filename;
+}
+
+function getMigrationFileNames(migrations) {
+    return migrations.map(migration => migration.filename);
+}
+
+/* -------------------------- Main ---------------------------------- */
+
+function run(commandLineArgs, callback) {
+    if (commandLineArgs.help) {
         printUsage();
         callback(null);
         return;
     }
 
-    if (options.version) {
+    if (commandLineArgs.version) {
         console.log(`Version: ${pjson.version}`);
         callback(null);
         return;
     }
 
     // Search for default config file if not specified
-    if (!options.config) {
+    if (!commandLineArgs.config) {
         try {
             fs.accessSync(path.join(process.cwd(), defaultConfigFile), fs.F_OK);
-            options.config = defaultConfigFile;
+            commandLineArgs.config = defaultConfigFile;
         } catch (e) {
             // Default config file does not exist.
         }
     }
 
-    if (!options.to && options.to !== 0) {
-        options.to = 'max';
+    if (!commandLineArgs.to && commandLineArgs.to !== 0) {
+        commandLineArgs.to = 'max';
     }
-    if (options.to !== 'max') {
-        options.to = Number(options.to).toString();
+    if (commandLineArgs.to !== 'max') {
+        commandLineArgs.to = Number(commandLineArgs.to).toString();
     }
 
-    let config;
-    if (options.config) {
-        const configFile = (path.isAbsolute(options.config)) ?
-            options.config :
-            path.join(process.cwd(), options.config);
+    let postgratorConfig;
+    if (commandLineArgs.config) {
+        const configFile = (path.isAbsolute(commandLineArgs.config)) ?
+            commandLineArgs.config :
+            path.join(process.cwd(), commandLineArgs.config);
 
         try {
             fs.accessSync(configFile, fs.F_OK);
@@ -71,52 +93,69 @@ function run(options, callback) {
             callback(new Error(`Config file not found: ${configFile}`));
             return;
         }
-        config = require(configFile);
+        postgratorConfig = require(configFile);
     } else {
-        config = {
-            migrationDirectory: options['migration-directory'],
-            driver: options.driver,
-            host: options.host,
-            port: options.port,
-            database: options.database,
-            username: options.username,
-            password: options.password,
-            options: { encrypt: options.secure || false },
+        postgratorConfig = {
+            migrationDirectory: commandLineArgs['migration-directory'],
+            driver: commandLineArgs.driver,
+            host: commandLineArgs.host,
+            port: commandLineArgs.port,
+            database: commandLineArgs.database,
+            username: commandLineArgs.username,
+            password: commandLineArgs.password,
+            options: { encrypt: commandLineArgs.secure || false },
         };
     }
-    if (!config.migrationDirectory) {
-        config.migrationDirectory = commandLineOptions.DEFAULT_MIGRATION_DIRECTORY;
+    if (!postgratorConfig.migrationDirectory) {
+        postgratorConfig.migrationDirectory = commandLineOptions.DEFAULT_MIGRATION_DIRECTORY;
     }
-    if (!path.isAbsolute(config.migrationDirectory)) {
-        config.migrationDirectory = path.join(process.cwd(), config.migrationDirectory);
+    if (!path.isAbsolute(postgratorConfig.migrationDirectory)) {
+        postgratorConfig.migrationDirectory = path.join(process.cwd(), postgratorConfig.migrationDirectory);
     }
 
-    if (!fs.existsSync(config.migrationDirectory)) {
-        if (!options.config && options['migration-directory'] === commandLineOptions.DEFAULT_MIGRATION_DIRECTORY) {
+    if (!fs.existsSync(postgratorConfig.migrationDirectory)) {
+        if (!commandLineArgs.config && commandLineArgs['migration-directory'] === commandLineOptions.DEFAULT_MIGRATION_DIRECTORY) {
             printUsage();
         }
-        callback(new Error(`Directory "${config.migrationDirectory}" does not exist.`));
+        callback(new Error(`Directory "${postgratorConfig.migrationDirectory}" does not exist.`));
         return;
     }
 
+    const detectVersionConflicts = postgratorConfig['detect-version-conflicts'] || commandLineArgs['detect-version-conflicts'];
+    delete postgratorConfig['detect-version-conflicts']; // It's not postgrator but postgrator-cli setting
+
     let postgrator;
     try {
-        postgrator = new Postgrator(config);
+        postgrator = new Postgrator(postgratorConfig);
     } catch (err) {
         printUsage();
         callback(err);
         return;
     }
 
-    postgrator.on('validation-started', migration => logMessage(`verifying checksum of migration ${migration.filename}`));
-    postgrator.on('migration-started', migration => logMessage(`running ${migration.filename}`));
+    postgrator.on(
+        'validation-started',
+        migration => logMessage(`verifying checksum of migration ${migration.filename}`)
+    );
+    postgrator.on(
+        'migration-started',
+        migration => logMessage(`running ${migration.filename}`)
+    );
 
     let databaseVersion = null;
 
     const migratePromise = postgrator.getMigrations()
         .then((migrations) => {
             if (!migrations || !migrations.length) {
-                throw new Error(`No migration files found from "${config.migrationDirectory}"`);
+                throw new Error(`No migration files found from "${postgratorConfig.migrationDirectory}"`);
+            }
+            if (detectVersionConflicts) {
+                const conflictingMigrations = getConflictingMigrations(migrations);
+                if (conflictingMigrations && conflictingMigrations.length > 0) {
+                    const conflictingMigrationFileNames = getMigrationFileNames(conflictingMigrations);
+                    const conflictingMigrationFileNamesString = conflictingMigrationFileNames.join('\n');
+                    throw new Error(`Conflicting migration file versions:\n${conflictingMigrationFileNamesString}`);
+                }
             }
         })
         .then(() => {
@@ -130,16 +169,16 @@ function run(options, callback) {
             logMessage(`version of database is: ${version}`);
         })
         .then(() => {
-            if (options.to === 'max') {
+            if (commandLineArgs.to === 'max') {
                 return postgrator.getMaxVersion();
             }
-            return options.to;
+            return commandLineArgs.to;
         })
         .then((version) => {
             logMessage(`migrating ${(version >= databaseVersion) ? 'up' : 'down'} to ${version}`);
         })
         .then(() => {
-            return postgrator.migrate(options.to);
+            return postgrator.migrate(commandLineArgs.to);
         });
 
     promiseToCallback(migratePromise, (err, migrations) => {

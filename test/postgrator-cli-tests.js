@@ -138,8 +138,10 @@ function buildTestsForOptions(options) {
     });
 
     tests.push((callback) => {
-        console.log('\n----- testing migration to 000 -----');
+        console.log('\n----- testing migration to 000 with conflict detection-----');
         options.to = 0;
+        options['detect-version-conflicts'] = true;
+
         postgratorCli.run(options, (err, migrations) => {
             restoreOptions();
             assert.equal(migrations.length, 3);
@@ -383,6 +385,26 @@ function buildTestsForOptions(options) {
             assert.strictEqual(migrations, undefined);
             assert.ok(log.indexOf('Examples') >= 0, 'No help was displayed');
             assert(err.message.indexOf('does not exist') >= 0, 'No directory does not exist error was displayed');
+            return callback();
+        });
+    });
+
+    tests.push((callback) => {
+        console.log('\n----- testing detecting migration files with same number-----');
+        options.config = '';
+        options['detect-version-conflicts'] = true;
+        options.to = 3;
+        options['migration-directory'] = 'test/conflicting-migrations';
+
+        postgratorCli.run(options, (err, migrations) => {
+            restoreOptions();
+            assert.strictEqual(
+                migrations,
+                undefined,
+                'Migrations were run although there were migration files with same number'
+            );
+            assert(err.message.indexOf('Conflicting migration file versions:') >= 0, 'No migration conflicts were detected');
+            assert(err.message.indexOf('002') >= 0, 'No correct migration conflict was detected');
             return callback();
         });
     });
