@@ -1,3 +1,5 @@
+/* eslint max-len: 0 */
+
 const pjson = require('./package.json');
 
 const DEFAULT_MIGRATION_DIRECTORY = 'migrations';
@@ -38,12 +40,16 @@ const optionDefinitions = [
         alias: 'm', type: String, typeLabel: '[underline]{directory}', defaultValue: 'migrations',
     },
     {
-        name: 'config', description: 'Load configuration from a JSON file.  With a configuration file you can also use additional configuration parameters available on postgrator. See syntax from https://github.com/rickbergfalk/postgrator',
-        alias: 'c', type: String, typeLabel: '[underline]{file}',
-    },
-    {
         name: 'secure', description: 'Secure connection (Azure). Default: false',
         alias: 's', type: Boolean,
+    },
+    {
+        name: 'detect-version-conflicts', description: 'Show an error and do not run any migrations if there are multiple migration files with same version number',
+        alias: 't', type: Boolean,
+    },
+    {
+        name: 'config', description: 'Load configuration from a JSON file.  With a configuration file you can also use additional configuration parameters available on postgrator. See syntax from https://github.com/rickbergfalk/postgrator',
+        alias: 'c', type: String, typeLabel: '[underline]{file}',
     },
     {
         name: 'version', description: 'Print version.',
