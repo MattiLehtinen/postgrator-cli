@@ -17,27 +17,27 @@ const optionDefinitions = [
     },
     {
         name: 'host', description: "Host. Default: '127.0.0.1'",
-        alias: 'h', type: String, typeLabel: '[underline]{hostname}', defaultValue: '127.0.0.1',
+        alias: 'h', type: String, typeLabel: '{underline hostname}', defaultValue: '127.0.0.1',
     },
     {
         name: 'port', description: "Host. Default: '5432'",
-        alias: 'o', type: Number, typeLabel: '[underline]{port}', defaultValue: '5432',
+        alias: 'o', type: Number, typeLabel: '{underline port}', defaultValue: '5432',
     },
     {
         name: 'database', description: 'Database name',
-        alias: 'd', type: String, typeLabel: '[underline]{database}', defaultValue: '',
+        alias: 'd', type: String, typeLabel: '{underline database}', defaultValue: '',
     },
     {
         name: 'username', description: 'Username',
-        alias: 'u', type: String, typeLabel: '[underline]{database}', defaultValue: '',
+        alias: 'u', type: String, typeLabel: '{underline database}', defaultValue: '',
     },
     {
         name: 'password', description: 'Password',
-        alias: 'p', type: String, typeLabel: '[underline]{password}', defaultValue: '',
+        alias: 'p', type: String, typeLabel: '{underline password}', defaultValue: '',
     },
     {
         name: 'migration-directory', description: "A directory to run migration files from. Default: 'migrations''",
-        alias: 'm', type: String, typeLabel: '[underline]{directory}', defaultValue: 'migrations',
+        alias: 'm', type: String, typeLabel: '{underline directory}', defaultValue: 'migrations',
     },
     {
         name: 'secure', description: 'Secure connection (Azure). Default: false',
@@ -49,7 +49,7 @@ const optionDefinitions = [
     },
     {
         name: 'config', description: 'Load configuration from a JSON file.  With a configuration file you can also use additional configuration parameters available on postgrator. See syntax from https://github.com/rickbergfalk/postgrator',
-        alias: 'c', type: String, typeLabel: '[underline]{file}',
+        alias: 'c', type: String, typeLabel: '{underline file}',
     },
     {
         name: 'version', description: 'Print version.',
@@ -101,7 +101,7 @@ const sections = [
         header: 'About',
         content: [
             `postgrator-cli v. ${pjson.version}`,
-            '[underline]{https://github.com/MattiLehtinen/postgrator-cli}',
+            '{underline https://github.com/MattiLehtinen/postgrator-cli}',
         ],
     },
 ];
