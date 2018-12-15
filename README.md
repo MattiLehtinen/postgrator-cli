@@ -133,7 +133,7 @@ then run `npm test`
 ## Release notes
 
 ### 3.1.0
-#### Not released yet
+#### 15.12.2018
 * Added option `detect-version-conflicts` to detect if there are multiple migration files with same version number.
 
 ### 3.0.0
