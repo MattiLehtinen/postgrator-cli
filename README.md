@@ -1,9 +1,6 @@
 # Postgrator CLI
 
-SQL migration tool for PostgreSQL, MySQL and SQL Server.
-
-A command line runner for [Postgrator](https://github.com/rickbergfalk/postgrator) - A SQL migration tool using a directory of plain SQL scripts.
-
+Command line SQL migration tool using plain SQL scripts for PostgreSQL, MySQL and SQL Server.
 
 Uses [Postgrator](https://github.com/rickbergfalk/postgrator) node.js library developed by [Rick Bergfalk](https://github.com/rickbergfalk).
 
