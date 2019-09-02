@@ -46,8 +46,8 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "command-line-args": "^5.0.2",
-    "command-line-usage": "^5.0.5",
+    "command-line-args": "^5.1.1",
+    "command-line-usage": "^6.0.2",
     "postgrator": "^3.7.0"
   },
   "devDependencies": {
