@@ -48,7 +48,7 @@
   "dependencies": {
     "command-line-args": "^5.1.1",
     "command-line-usage": "^6.0.2",
-    "postgrator": "^3.7.0"
+    "postgrator": "^3.10.2"
   },
   "devDependencies": {
     "async": "3.1.0",
@@ -56,6 +56,6 @@
     "eslint": "^6.3.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
-    "pg": "^7.5.0"
+    "pg": "^7.12.1"
   }
 }
