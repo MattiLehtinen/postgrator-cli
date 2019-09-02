@@ -128,16 +128,3 @@ then run `npm test`
 ## TODO
 * Allow overriding config file parameters from command line
 
-## Release notes
-
-### 3.1.0
-#### 15.12.2018
-* Added option `detect-version-conflicts` to detect if there are multiple migration files with same version number.
-
-### 3.0.0
-#### 1.7.2018
-* Upgraded for Postgrator 3.
-
-## License
-
-MIT
