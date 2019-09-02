@@ -46,7 +46,7 @@ function areConflictingMigrations(migrationA, migrationB) {
 }
 
 function getMigrationFileNames(migrations) {
-    return migrations.map(migration => migration.filename);
+    return migrations.map((migration) => migration.filename);
 }
 
 /* -------------------------- Main ---------------------------------- */
@@ -135,11 +135,11 @@ function run(commandLineArgs, callback) {
 
     postgrator.on(
         'validation-started',
-        migration => logMessage(`verifying checksum of migration ${migration.filename}`)
+        (migration) => logMessage(`verifying checksum of migration ${migration.filename}`)
     );
     postgrator.on(
         'migration-started',
-        migration => logMessage(`running ${migration.filename}`)
+        (migration) => logMessage(`running ${migration.filename}`)
     );
 
     let databaseVersion = null;

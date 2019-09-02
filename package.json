@@ -53,9 +53,9 @@
   "devDependencies": {
     "async": "^2.6.1",
     "crlf": "^1.1.1",
-    "eslint": "^5.10.0",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.14.0",
+    "eslint": "^6.3.0",
+    "eslint-config-airbnb-base": "^14.0.0",
+    "eslint-plugin-import": "^2.18.2",
     "pg": "^7.5.0"
   }
 }
