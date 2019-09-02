@@ -51,7 +51,7 @@
     "postgrator": "^3.7.0"
   },
   "devDependencies": {
-    "async": "^2.6.1",
+    "async": "3.1.0",
     "crlf": "^1.1.1",
     "eslint": "^6.3.0",
     "eslint-config-airbnb-base": "^14.0.0",
