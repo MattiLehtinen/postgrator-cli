@@ -6,6 +6,9 @@
   "bin": {
     "postgrator": "./index.js"
   },
+  "engines": {
+    "node": ">=6.0.0"
+  },
   "scripts": {
     "lint": "eslint .",
     "pretest": "npm run lint",
@@ -47,13 +50,13 @@
   "license": "MIT",
   "dependencies": {
     "command-line-args": "^5.1.1",
-    "command-line-usage": "^6.0.2",
+    "command-line-usage": "^5.0.5",
     "postgrator": "^3.10.2"
   },
   "devDependencies": {
     "async": "3.1.0",
     "crlf": "^1.1.1",
-    "eslint": "^6.3.0",
+    "eslint": "^5.16.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
     "pg": "^7.12.1"
