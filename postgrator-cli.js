@@ -26,6 +26,51 @@ function logMessage(message) {
     console.log(`${messagePrefix} ${message}`);
 }
 
+
+/**
+ * Gets version to migrate to as number
+ * @param {string|number} to    Version or "max"
+ * @param {object} postgrator
+ * @returns {number} Version to migrate to
+ */
+function getMigrateToVersion(to, postgrator) {
+    if (to === 'max') {
+        return postgrator.getMaxVersion();
+    }
+    return to;
+}
+
+function checkMigrations(migrations, migrationDirectory, detectVersionConflicts) {
+    if (!migrations || !migrations.length) {
+        throw new Error(`No migration files found from "${migrationDirectory}"`);
+    }
+    if (detectVersionConflicts) {
+        checkVersionConflicts(migrations);
+    }
+}
+
+function checkVersionConflicts(migrations) {
+    const conflictingMigrationFileNamesString = getConflictingMigrationFileNamesString(migrations);
+    if (conflictingMigrationFileNamesString) {
+        throw new Error(`Conflicting migration file versions:\n${conflictingMigrationFileNamesString}`);
+    }
+}
+
+function getConflictingMigrationFileNamesString(migrations) {
+    let conflictingMigrationFileNamesString = '';
+
+    const conflictingMigrations = getConflictingMigrations(migrations);
+    if (conflictingMigrations && conflictingMigrations.length > 0) {
+        const conflictingMigrationFileNames = getMigrationFileNames(conflictingMigrations);
+        conflictingMigrationFileNamesString = conflictingMigrationFileNames.join('\n');
+    }
+    return conflictingMigrationFileNamesString;
+}
+
+function getMigrationFileNames(migrations) {
+    return migrations.map((migration) => migration.filename);
+}
+
 function getConflictingMigrations(migrations) {
     let conflictingMigrations = [];
 
@@ -45,26 +90,12 @@ function areConflictingMigrations(migrationA, migrationB) {
         && migrationA.filename !== migrationB.filename;
 }
 
-function getMigrationFileNames(migrations) {
-    return migrations.map((migration) => migration.filename);
-}
-
 function migrate(postgrator, to, detectVersionConflicts, migrationDirectory) {
-    let databaseVersion = null;
+    const toVersion = getMigrateToVersion(to, postgrator);
 
     return postgrator.getMigrations()
         .then((migrations) => {
-            if (!migrations || !migrations.length) {
-                throw new Error(`No migration files found from "${migrationDirectory}"`);
-            }
-            if (detectVersionConflicts) {
-                const conflictingMigrations = getConflictingMigrations(migrations);
-                if (conflictingMigrations && conflictingMigrations.length > 0) {
-                    const conflictingMigrationFileNames = getMigrationFileNames(conflictingMigrations);
-                    const conflictingMigrationFileNamesString = conflictingMigrationFileNames.join('\n');
-                    throw new Error(`Conflicting migration file versions:\n${conflictingMigrationFileNamesString}`);
-                }
-            }
+            checkMigrations(migrations, migrationDirectory, detectVersionConflicts);
         })
         .then(() => {
             return postgrator.getDatabaseVersion().catch(() => {
@@ -72,20 +103,9 @@ function migrate(postgrator, to, detectVersionConflicts, migrationDirectory) {
                 return 0;
             });
         })
-        .then((version) => {
-            databaseVersion = version;
-            logMessage(`version of database is: ${version}`);
-        })
-        .then(() => {
-            if (to === 'max') {
-                return postgrator.getMaxVersion();
-            }
-            return to;
-        })
-        .then((version) => {
-            logMessage(`migrating ${(version >= databaseVersion) ? 'up' : 'down'} to ${version}`);
-        })
-        .then(() => {
+        .then((databaseVersion) => {
+            logMessage(`version of database is: ${databaseVersion}`);
+            logMessage(`migrating ${(toVersion >= databaseVersion) ? 'up' : 'down'} to ${toVersion}`);
             return postgrator.migrate(to);
         });
 }
