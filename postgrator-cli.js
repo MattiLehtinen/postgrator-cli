@@ -184,14 +184,24 @@ function getPassword(postgratorConfig, callback) {
     rl.stdoutMuted = true;
 
     rl.question('Password: ', (password) => {
+        rl.history = rl.history.slice(1);
         rl.close();
+        console.log('\n');
         callback(password);
     });
 
     // eslint-disable-next-line no-underscore-dangle
     rl._writeToOutput = function _writeToOutput(stringToWrite) {
         if (rl.stdoutMuted) {
-            rl.output.write('*');
+            switch (stringToWrite) {
+            case '\u0004':
+            case '\n':
+            case '\r':
+            case '\r\n':
+                break;
+            default:
+                rl.output.write('*');
+            }
         } else {
             rl.output.write(stringToWrite);
         }

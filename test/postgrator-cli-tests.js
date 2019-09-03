@@ -387,6 +387,7 @@ function buildTestsForOptions(options) {
         readline.createInterface = () => {
             return {
                 question: (_questionTest, cb) => { passwordAsked = true; cb('myPassword'); }, // invalid password
+                history: { slice: () => {} },
                 close: () => {},
             };
         };
@@ -413,6 +414,7 @@ function buildTestsForOptions(options) {
         readline.createInterface = () => {
             return {
                 question: (_questionTest, cb) => { passwordAsked = true; cb('postgrator'); }, // correct password
+                history: { slice: () => {} },
                 close: () => {},
             };
         };
