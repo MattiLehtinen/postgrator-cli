@@ -128,7 +128,3 @@ To run postgrator tests locally, you'll need:
 - A [postgreSQL](http://www.postgresql.org/download/) instance running on default port (5432), with a `postgrator` (password `postgrator`) account and a `postgrator` database
 
 then run `npm test`
-
-## TODO
-* Allow overriding config file parameters from command line
-
