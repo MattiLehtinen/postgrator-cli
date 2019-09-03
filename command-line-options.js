@@ -32,8 +32,8 @@ const optionDefinitions = [
         alias: 'u', type: String, typeLabel: '{underline database}', defaultValue: '',
     },
     {
-        name: 'password', description: 'Password',
-        alias: 'p', type: String, typeLabel: '{underline password}', defaultValue: '',
+        name: 'password', description: 'Password. If parameter without value is given, password will be asked.',
+        alias: 'p', type: String, typeLabel: '[{underline password}]', defaultValue: '',
     },
     {
         name: 'migration-directory', description: "A directory to run migration files from. Default: 'migrations''",

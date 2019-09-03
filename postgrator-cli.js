@@ -5,7 +5,7 @@ const Postgrator = require('postgrator');
 const pjson = require('./package.json');
 const commandLineOptions = require('./command-line-options');
 
-const defaultConfigFile = 'postgrator.json';
+const DEFAULT_CONFIG_FILE = 'postgrator.json';
 
 function printUsage() {
     const usage = getUsage(commandLineOptions.sections);
@@ -26,18 +26,65 @@ function logMessage(message) {
     console.log(`${messagePrefix} ${message}`);
 }
 
+function getMigrateToNumber(toArgument) {
+    if ((!toArgument && toArgument !== 0) || toArgument === 'max') {
+        return 'max';
+    }
+    return Number(toArgument).toString();
+}
+
+function hasDefaultConfigFile() {
+    const defaultConfigFilePath = path.join(process.cwd(), DEFAULT_CONFIG_FILE);
+    return fileIsAccessible(defaultConfigFilePath);
+}
+
+function getPostgratorConfigFromFile(configFile) {
+    const configFilePath = getAbsolutePath(configFile);
+    if (!fileIsAccessible(configFilePath)) {
+        throw new Error(`Config file not found: ${configFilePath}`);
+    }
+    return require(configFilePath);
+}
+
+function getAbsolutePath(fileOrDirectory) {
+    return (path.isAbsolute(fileOrDirectory))
+        ? fileOrDirectory
+        : path.join(process.cwd(), fileOrDirectory);
+}
+
+function fileIsAccessible(filePath) {
+    try {
+        fs.accessSync(filePath, fs.F_OK);
+        return true;
+    } catch (e) {
+        return false;
+    }
+}
+
+function getPostgratorConfigFromCommandLineArgs(commandLineArgs) {
+    return {
+        migrationDirectory: commandLineArgs['migration-directory'],
+        driver: commandLineArgs.driver,
+        host: commandLineArgs.host,
+        port: commandLineArgs.port,
+        database: commandLineArgs.database,
+        username: commandLineArgs.username,
+        password: commandLineArgs.password,
+        options: { encrypt: commandLineArgs.secure || false },
+    };
+}
 
 /**
  * Gets version to migrate to as number
  * @param {string|number} to    Version or "max"
  * @param {object} postgrator
- * @returns {number} Version to migrate to
+ * @returns {Promise<number>} Version to migrate to
  */
 function getMigrateToVersion(to, postgrator) {
     if (to === 'max') {
         return postgrator.getMaxVersion();
     }
-    return to;
+    return Promise.resolve(to);
 }
 
 function checkMigrations(migrations, migrationDirectory, detectVersionConflicts) {
@@ -91,13 +138,17 @@ function areConflictingMigrations(migrationA, migrationB) {
 }
 
 function migrate(postgrator, to, detectVersionConflicts, migrationDirectory) {
-    const toVersion = getMigrateToVersion(to, postgrator);
+    let toVersion;
 
     return postgrator.getMigrations()
         .then((migrations) => {
             checkMigrations(migrations, migrationDirectory, detectVersionConflicts);
         })
         .then(() => {
+            return getMigrateToVersion(to, postgrator);
+        })
+        .then((migrateToVersion) => {
+            toVersion = migrateToVersion;
             return postgrator.getDatabaseVersion().catch(() => {
                 logMessage('table schemaversion does not exist - creating it.');
                 return 0;
@@ -110,15 +161,54 @@ function migrate(postgrator, to, detectVersionConflicts, migrationDirectory) {
         });
 }
 
+/**
+ * Gets password from postgrator config or as user input
+ * @param {object} postgratorConfig
+ * @param {Function} callback
+ * @returns {string} password
+ */
+function getPassword(postgratorConfig, callback) {
+    if (postgratorConfig.password !== null && postgratorConfig.password !== undefined) {
+        callback(postgratorConfig.password);
+        return;
+    }
+
+    // Ask password if it is not set
+    const readline = require('readline');
+
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+
+    rl.stdoutMuted = true;
+
+    rl.question('Password: ', (password) => {
+        rl.close();
+        callback(password);
+    });
+
+    // eslint-disable-next-line no-underscore-dangle
+    rl._writeToOutput = function _writeToOutput(stringToWrite) {
+        if (rl.stdoutMuted) {
+            rl.output.write('*');
+        } else {
+            rl.output.write(stringToWrite);
+        }
+    };
+}
+
 /* -------------------------- Main ---------------------------------- */
 
 function run(commandLineArgs, callback) {
+    // Print help if requested
     if (commandLineArgs.help) {
         printUsage();
         callback(null);
         return;
     }
 
+    // Print version if requested
     if (commandLineArgs.version) {
         console.log(`Version: ${pjson.version}`);
         callback(null);
@@ -126,53 +216,25 @@ function run(commandLineArgs, callback) {
     }
 
     // Search for default config file if not specified
-    if (!commandLineArgs.config) {
-        try {
-            fs.accessSync(path.join(process.cwd(), defaultConfigFile), fs.F_OK);
-            commandLineArgs.config = defaultConfigFile;
-        } catch (e) {
-            // Default config file does not exist.
-        }
-    }
-
-    if (!commandLineArgs.to && commandLineArgs.to !== 0) {
-        commandLineArgs.to = 'max';
-    }
-    if (commandLineArgs.to !== 'max') {
-        commandLineArgs.to = Number(commandLineArgs.to).toString();
+    if (!commandLineArgs.config && hasDefaultConfigFile()) {
+        commandLineArgs.config = DEFAULT_CONFIG_FILE;
     }
 
     let postgratorConfig;
     if (commandLineArgs.config) {
-        const configFile = (path.isAbsolute(commandLineArgs.config))
-            ? commandLineArgs.config
-            : path.join(process.cwd(), commandLineArgs.config);
-
         try {
-            fs.accessSync(configFile, fs.F_OK);
-        } catch (e) {
-            callback(new Error(`Config file not found: ${configFile}`));
+            postgratorConfig = getPostgratorConfigFromFile(commandLineArgs.config);
+        } catch (err) {
+            callback(err);
             return;
         }
-        postgratorConfig = require(configFile);
     } else {
-        postgratorConfig = {
-            migrationDirectory: commandLineArgs['migration-directory'],
-            driver: commandLineArgs.driver,
-            host: commandLineArgs.host,
-            port: commandLineArgs.port,
-            database: commandLineArgs.database,
-            username: commandLineArgs.username,
-            password: commandLineArgs.password,
-            options: { encrypt: commandLineArgs.secure || false },
-        };
+        postgratorConfig = getPostgratorConfigFromCommandLineArgs(commandLineArgs);
     }
     if (!postgratorConfig.migrationDirectory) {
         postgratorConfig.migrationDirectory = commandLineOptions.DEFAULT_MIGRATION_DIRECTORY;
     }
-    if (!path.isAbsolute(postgratorConfig.migrationDirectory)) {
-        postgratorConfig.migrationDirectory = path.join(process.cwd(), postgratorConfig.migrationDirectory);
-    }
+    postgratorConfig.migrationDirectory = getAbsolutePath(postgratorConfig.migrationDirectory);
 
     if (!fs.existsSync(postgratorConfig.migrationDirectory)) {
         if (!commandLineArgs.config && commandLineArgs['migration-directory'] === commandLineOptions.DEFAULT_MIGRATION_DIRECTORY) {
@@ -185,32 +247,40 @@ function run(commandLineArgs, callback) {
     const detectVersionConflicts = postgratorConfig['detect-version-conflicts'] || commandLineArgs['detect-version-conflicts'];
     delete postgratorConfig['detect-version-conflicts']; // It's not postgrator but postgrator-cli setting
 
-    let postgrator;
-    try {
-        postgrator = new Postgrator(postgratorConfig);
-    } catch (err) {
-        printUsage();
-        callback(err);
-        return;
-    }
+    const migrateTo = getMigrateToNumber(commandLineArgs.to);
 
-    postgrator.on(
-        'validation-started',
-        (migration) => logMessage(`verifying checksum of migration ${migration.filename}`)
-    );
-    postgrator.on(
-        'migration-started',
-        (migration) => logMessage(`running ${migration.filename}`)
-    );
+    getPassword(postgratorConfig, (password) => {
+        postgratorConfig.password = password;
 
-    const migratePromise = migrate(postgrator, commandLineArgs.to, detectVersionConflicts, postgratorConfig.migrationDirectory);
-
-    promiseToCallback(migratePromise, (err, migrations) => {
-        // connection is closed, or will close in the case of SQL Server
-        if (err && typeof err === 'string') {
-            err = new Error(err);
+        // Create postgrator
+        let postgrator;
+        try {
+            postgrator = new Postgrator(postgratorConfig);
+        } catch (err) {
+            printUsage();
+            callback(err);
+            return;
         }
-        return callback(err, migrations);
+
+        // Postgrator events
+        postgrator.on(
+            'validation-started',
+            (migration) => logMessage(`verifying checksum of migration ${migration.filename}`)
+        );
+        postgrator.on(
+            'migration-started',
+            (migration) => logMessage(`running ${migration.filename}`)
+        );
+
+        const migratePromise = migrate(postgrator, migrateTo, detectVersionConflicts, postgratorConfig.migrationDirectory);
+
+        promiseToCallback(migratePromise, (err, migrations) => {
+            // connection is closed, or will close in the case of SQL Server
+            if (err && typeof err === 'string') {
+                err = new Error(err);
+            }
+            return callback(err, migrations);
+        });
     });
 }
 
