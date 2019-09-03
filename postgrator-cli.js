@@ -49,6 +49,47 @@ function getMigrationFileNames(migrations) {
     return migrations.map((migration) => migration.filename);
 }
 
+function migrate(postgrator, to, detectVersionConflicts, migrationDirectory) {
+    let databaseVersion = null;
+
+    return postgrator.getMigrations()
+        .then((migrations) => {
+            if (!migrations || !migrations.length) {
+                throw new Error(`No migration files found from "${migrationDirectory}"`);
+            }
+            if (detectVersionConflicts) {
+                const conflictingMigrations = getConflictingMigrations(migrations);
+                if (conflictingMigrations && conflictingMigrations.length > 0) {
+                    const conflictingMigrationFileNames = getMigrationFileNames(conflictingMigrations);
+                    const conflictingMigrationFileNamesString = conflictingMigrationFileNames.join('\n');
+                    throw new Error(`Conflicting migration file versions:\n${conflictingMigrationFileNamesString}`);
+                }
+            }
+        })
+        .then(() => {
+            return postgrator.getDatabaseVersion().catch(() => {
+                logMessage('table schemaversion does not exist - creating it.');
+                return 0;
+            });
+        })
+        .then((version) => {
+            databaseVersion = version;
+            logMessage(`version of database is: ${version}`);
+        })
+        .then(() => {
+            if (to === 'max') {
+                return postgrator.getMaxVersion();
+            }
+            return to;
+        })
+        .then((version) => {
+            logMessage(`migrating ${(version >= databaseVersion) ? 'up' : 'down'} to ${version}`);
+        })
+        .then(() => {
+            return postgrator.migrate(to);
+        });
+}
+
 /* -------------------------- Main ---------------------------------- */
 
 function run(commandLineArgs, callback) {
@@ -142,44 +183,7 @@ function run(commandLineArgs, callback) {
         (migration) => logMessage(`running ${migration.filename}`)
     );
 
-    let databaseVersion = null;
-
-    const migratePromise = postgrator.getMigrations()
-        .then((migrations) => {
-            if (!migrations || !migrations.length) {
-                throw new Error(`No migration files found from "${postgratorConfig.migrationDirectory}"`);
-            }
-            if (detectVersionConflicts) {
-                const conflictingMigrations = getConflictingMigrations(migrations);
-                if (conflictingMigrations && conflictingMigrations.length > 0) {
-                    const conflictingMigrationFileNames = getMigrationFileNames(conflictingMigrations);
-                    const conflictingMigrationFileNamesString = conflictingMigrationFileNames.join('\n');
-                    throw new Error(`Conflicting migration file versions:\n${conflictingMigrationFileNamesString}`);
-                }
-            }
-        })
-        .then(() => {
-            return postgrator.getDatabaseVersion().catch(() => {
-                logMessage('table schemaversion does not exist - creating it.');
-                return 0;
-            });
-        })
-        .then((version) => {
-            databaseVersion = version;
-            logMessage(`version of database is: ${version}`);
-        })
-        .then(() => {
-            if (commandLineArgs.to === 'max') {
-                return postgrator.getMaxVersion();
-            }
-            return commandLineArgs.to;
-        })
-        .then((version) => {
-            logMessage(`migrating ${(version >= databaseVersion) ? 'up' : 'down'} to ${version}`);
-        })
-        .then(() => {
-            return postgrator.migrate(commandLineArgs.to);
-        });
+    const migratePromise = migrate(postgrator, commandLineArgs.to, detectVersionConflicts, postgratorConfig.migrationDirectory);
 
     promiseToCallback(migratePromise, (err, migrations) => {
         // connection is closed, or will close in the case of SQL Server
