@@ -1,6 +1,10 @@
 # Postgrator CLI
 
-Command line SQL migration tool using plain SQL scripts for PostgreSQL, MySQL and SQL Server.
+Command line SQL database migration tool using SQL scripts. For PostgreSQL, MySQL and SQL Server.
+
+Version control your database using plain old SQL files.
+
+Supports also undoing migrations.
 
 Uses [Postgrator](https://github.com/rickbergfalk/postgrator) node.js library developed by [Rick Bergfalk](https://github.com/rickbergfalk).
 
@@ -124,7 +128,3 @@ To run postgrator tests locally, you'll need:
 - A [postgreSQL](http://www.postgresql.org/download/) instance running on default port (5432), with a `postgrator` (password `postgrator`) account and a `postgrator` database
 
 then run `npm test`
-
-## TODO
-* Allow overriding config file parameters from command line
-

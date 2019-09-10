@@ -3,6 +3,7 @@ const async = require('async');
 const commandLineArgs = require('command-line-args');
 const fs = require('fs');
 const path = require('path');
+const readline = require('readline');
 
 const commandLineOptions = require('../command-line-options');
 const postgratorCli = require('../postgrator-cli');
@@ -371,6 +372,62 @@ function buildTestsForOptions(options) {
             restoreOptions();
             assert(err.length > 0);
             return callback(null);
+        });
+    });
+
+    tests.push((callback) => {
+        console.log('\n----- testing null password asks from user-----');
+
+        let passwordAsked = false;
+        options.config = '';
+        options.password = null;
+
+        // mock readline
+        const originalCreateInterface = readline.createInterface;
+        readline.createInterface = () => {
+            return {
+                question: (_questionTest, cb) => { passwordAsked = true; cb('myPassword'); }, // invalid password
+                history: { slice: () => {} },
+                close: () => {},
+            };
+        };
+
+        postgratorCli.run(options, (err) => {
+            restoreOptions();
+            assert(passwordAsked);
+            assert(err.length > 0);
+            readline.createInterface = originalCreateInterface;
+            return callback(null);
+        });
+    });
+
+    tests.push((callback) => {
+        console.log('\n----- testing that config file without password asks from user -----');
+        options.to = 'max';
+        options.username = '';
+        options.database = '';
+        options.config = 'test/config-without-password.json';
+        let passwordAsked = false;
+
+        // mock readline
+        const originalCreateInterface = readline.createInterface;
+        readline.createInterface = () => {
+            return {
+                question: (_questionTest, cb) => { passwordAsked = true; cb('postgrator'); }, // correct password
+                history: { slice: () => {} },
+                close: () => {},
+            };
+        };
+
+        postgratorCli.run(options, (err, migrations) => {
+            assert.ifError(err);
+            assert(migrations.length);
+            assert(passwordAsked);
+            readline.createInterface = originalCreateInterface;
+            return resetMigrations(() => {
+                restoreOptions();
+                callback();
+            });
         });
     });
 
