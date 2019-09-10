@@ -1,7 +1,7 @@
 # Changelog
 
 ## 3.3.0
-### Nnn Nnn, 2019
+### September 9, 2019
 * Ask password if -p or --password parameter without value is given or if config file does not contain password.
 * Fix node6 compatibility
 
