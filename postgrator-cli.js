@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const url = require('url');
 const getUsage = require('command-line-usage');
 const Postgrator = require('postgrator');
 const pjson = require('./package.json');
@@ -71,6 +72,28 @@ function getPostgratorConfigFromCommandLineArgs(commandLineArgs) {
         username: commandLineArgs.username,
         password: commandLineArgs.password,
         options: { encrypt: commandLineArgs.secure || false },
+    };
+}
+
+function getPostgratorConfigFromEnvironment() {
+    let host, port, database, username, password;
+    if (process.env.DATABASE_URL) {
+        const dbUrl = url.parse(process.env.DATABASE_URL);
+        host = dbUrl.hostname;
+        port = dbUrl.port;
+        database = dbUrl.pathname.replace(/^\//, '');
+        [username, password] = dbUrl.auth.split(':');
+    }
+
+    return {
+        migrationDirectory: process.env.POSTGRATOR_MIGRATION_DIRECTORY || commandLineOptions.DEFAULT_MIGRATION_DIRECTORY,
+        driver: process.env.POSTGRATOR_DRIVER || commandLineOptions.DEFAULT_DRIVER,
+        host: host || process.env.POSTGRATOR_DBHOST,
+        port: port || process.env.POSTGRATOR_DBPORT,
+        database: database || process.env.POSTGRATOR_DB,
+        username: username || process.env.POSTGRATOR_DBUSERNAME,
+        password: password || process.env.POSTGRATOR_DBPASSWORD,
+        options: { encrypt: process.env.POSTGRATOR_SECURE || false },
     };
 }
 
@@ -238,6 +261,8 @@ function run(commandLineArgs, callback) {
             callback(err);
             return;
         }
+    } else if (commandLineArgs['use-env']) {
+        postgratorConfig = getPostgratorConfigFromEnvironment();
     } else {
         postgratorConfig = getPostgratorConfigFromCommandLineArgs(commandLineArgs);
     }
