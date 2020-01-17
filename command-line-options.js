@@ -2,6 +2,7 @@
 
 const pjson = require('./package.json');
 
+const DEFAULT_DRIVER = 'pg';
 const DEFAULT_MIGRATION_DIRECTORY = 'migrations';
 
 /* eslint-disable object-property-newline */
@@ -13,7 +14,7 @@ const optionDefinitions = [
     },
     {
         name: 'driver', description: "Database driver. Default: 'pg'",
-        alias: 'r', type: String, typeLabel: 'pg|mysql|mssql', defaultValue: 'pg',
+        alias: 'r', type: String, typeLabel: 'pg|mysql|mssql', defaultValue: DEFAULT_DRIVER,
     },
     {
         name: 'host', description: "Host. Default: '127.0.0.1'",
@@ -50,6 +51,10 @@ const optionDefinitions = [
     {
         name: 'config', description: 'Load configuration from a JSON file.  With a configuration file you can also use additional configuration parameters available on postgrator. See syntax from https://github.com/rickbergfalk/postgrator',
         alias: 'c', type: String, typeLabel: '{underline file}',
+    },
+    {
+        name: 'use-env', description: 'Load configuration from environment variables.',
+        alias: 'e', type: Boolean,
     },
     {
         name: 'version', description: 'Print version.',
@@ -108,4 +113,5 @@ const sections = [
 
 module.exports.sections = sections;
 module.exports.optionList = optionDefinitions;
+module.exports.DEFAULT_DRIVER = DEFAULT_DRIVER;
 module.exports.DEFAULT_MIGRATION_DIRECTORY = DEFAULT_MIGRATION_DIRECTORY;
