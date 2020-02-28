@@ -40,6 +40,10 @@ const optionDefinitions = [
         alias: 'm', type: String, typeLabel: '{underline directory}', defaultValue: 'migrations',
     },
     {
+        name: 'schema-table', description: "The name of the table where the version of the database will be stored. Default: 'schemaversion'",
+        alias: 'b', type: String, typeLabel: '{underline name}', defaultValue: 'schemaversion',
+    },
+    {
         name: 'secure', description: 'Secure connection (Azure). Default: false',
         alias: 's', type: Boolean,
     },

@@ -70,6 +70,7 @@ function getPostgratorConfigFromCommandLineArgs(commandLineArgs) {
         database: commandLineArgs.database,
         username: commandLineArgs.username,
         password: commandLineArgs.password,
+        schemaTable: commandLineArgs['schema-table'],
         options: { encrypt: commandLineArgs.secure || false },
     };
 }
@@ -137,7 +138,7 @@ function areConflictingMigrations(migrationA, migrationB) {
         && migrationA.filename !== migrationB.filename;
 }
 
-function migrate(postgrator, to, detectVersionConflicts, migrationDirectory) {
+function migrate(postgrator, to, detectVersionConflicts, migrationDirectory, schemaTable) {
     let toVersion;
 
     return postgrator.getMigrations()
@@ -150,7 +151,7 @@ function migrate(postgrator, to, detectVersionConflicts, migrationDirectory) {
         .then((migrateToVersion) => {
             toVersion = migrateToVersion;
             return postgrator.getDatabaseVersion().catch(() => {
-                logMessage('table schemaversion does not exist - creating it.');
+                logMessage(`table ${schemaTable} does not exist - creating it.`);
                 return 0;
             });
         })
@@ -282,7 +283,7 @@ function run(commandLineArgs, callback) {
             (migration) => logMessage(`running ${migration.filename}`)
         );
 
-        const migratePromise = migrate(postgrator, migrateTo, detectVersionConflicts, postgratorConfig.migrationDirectory);
+        const migratePromise = migrate(postgrator, migrateTo, detectVersionConflicts, postgratorConfig.migrationDirectory, postgratorConfig.schemaTable);
 
         promiseToCallback(migratePromise, (err, migrations) => {
             // connection is closed, or will close in the case of SQL Server

@@ -41,8 +41,9 @@ function removeVersionTable(options, callback) {
     console.log(`\n----- ${config.driver} removing tables -----`);
     const Postgrator = require('../node_modules/postgrator/postgrator.js');
     const pg = new Postgrator(config);
+    const versionTable = options['schema-table'];
 
-    promiseToCallback(pg.runQuery('DROP TABLE IF EXISTS schemaversion, animal, person'), (err) => {
+    promiseToCallback(pg.runQuery(`DROP TABLE IF EXISTS ${versionTable}, animal, person`), (err) => {
         assert.ifError(err);
         callback(err);
     });
@@ -465,6 +466,36 @@ function buildTestsForOptions(options) {
             return callback();
         });
     });
+
+    tests.push((callback) => {
+        options['schema-table'] = 'myschemaversion';
+        removeVersionTable(options, (err) => {
+            assert.ifError(err);
+            return callback();
+        });
+    });
+
+    tests.push((callback) => {
+        console.log('\n----- testing migration to 001 with custom version table-----');
+        options['schema-table'] = 'myschemaversion';
+        options.to = 1;
+        postgratorCli.run(options, (err, migrations) => {
+            assert.ifError(err);
+            assert.equal(migrations.length, 1);
+            assert.equal(migrations[0].version, 1);
+            return callback();
+        });
+    });
+
+    tests.push(resetMigrations);
+
+    tests.push((callback) => {
+        options['schema-table'] = 'myschemaversion';
+        removeVersionTable(options, (err) => {
+            assert.ifError(err);
+            return callback();
+        });
+    });
 }
 
 const options = {
@@ -476,6 +507,7 @@ const options = {
     username: 'postgrator',
     password: 'postgrator',
     'migration-directory': 'test/migrations',
+    'schema-table': 'schemaversion',
 };
 
 // Command line parameters
