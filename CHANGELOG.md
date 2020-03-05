@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.4.0
+### March 5, 2020
+* Added option `connection-string` to detect if there is a connection string value.
+
 ## 3.3.0
 ### September 9, 2019
 * Ask password if -p or --password parameter without value is given or if config file does not contain password.

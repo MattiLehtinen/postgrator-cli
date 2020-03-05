@@ -1,6 +1,6 @@
 {
   "name": "postgrator-cli",
-  "version": "3.3.0",
+  "version": "3.4.0",
   "description": "Command line interface for Postgrator",
   "author": "Matti Lehtinen <matlehti@gmail.com> (https://twitter.com/MattiLehtinen)",
   "bin": {
@@ -51,7 +51,7 @@
   "dependencies": {
     "command-line-args": "^5.1.1",
     "command-line-usage": "^5.0.5",
-    "postgrator": "^3.10.2"
+    "postgrator": "^3.11.0"
   },
   "devDependencies": {
     "async": "3.1.0",
