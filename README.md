@@ -90,6 +90,7 @@ $ postgrator 4
 
 ```
 postgrator [[--to=]<version>] --database=<db> [--driver=<driver>] [--host=<host>] [--port=<port>] [--username=<username>] [--password=<password>]
+postgrator [[--to=]<version>] [--n=<connection-string>]
 postgrator [[--to=]<version>] [--config=<config>]
 ```
 
@@ -110,6 +111,7 @@ postgrator [[--to=]<version>] [--config=<config>]
   -c, --config file                     Load configuration from a JSON file. With a configuration file you can also
                                         use additional configuration parameters available on postgrator. See syntax
                                         from https://github.com/rickbergfalk/postgrator
+  -n, --connection-string string        Connection string.
   -v, --version                         Print version.
   -?, --help                            Print this usage guide.
 
