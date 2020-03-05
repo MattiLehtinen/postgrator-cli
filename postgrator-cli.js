@@ -71,6 +71,7 @@ function getPostgratorConfigFromCommandLineArgs(commandLineArgs) {
         username: commandLineArgs.username,
         password: commandLineArgs.password,
         options: { encrypt: commandLineArgs.secure || false },
+        connectionString: commandLineArgs['connection-string'],
     };
 }
 
@@ -170,6 +171,9 @@ function migrate(postgrator, to, detectVersionConflicts, migrationDirectory) {
 function getPassword(postgratorConfig, callback) {
     if (postgratorConfig.password !== null && postgratorConfig.password !== undefined) {
         callback(postgratorConfig.password);
+        return;
+    } else if (postgratorConfig.connectionString !== null && postgratorConfig.connectionString !== undefined) {
+        callback();
         return;
     }
 

@@ -52,6 +52,10 @@ const optionDefinitions = [
         alias: 'c', type: String, typeLabel: '{underline file}',
     },
     {
+        name: 'connection-string', description: 'Connection string.',
+        alias: 'n', type: String,
+    },
+    {
         name: 'version', description: 'Print version.',
         alias: 'v', type: Boolean,
     },
