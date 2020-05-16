@@ -44,10 +44,6 @@ const optionDefinitions = [
         alias: 's', type: Boolean,
     },
     {
-        name: 'detect-version-conflicts', description: 'Show an error and do not run any migrations if there are multiple migration files with same version number',
-        alias: 't', type: Boolean,
-    },
-    {
         name: 'config', description: 'Load configuration from a JSON file.  With a configuration file you can also use additional configuration parameters available on postgrator. See syntax from https://github.com/rickbergfalk/postgrator',
         alias: 'c', type: String, typeLabel: '{underline file}',
     },

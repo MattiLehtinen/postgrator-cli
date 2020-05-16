@@ -87,62 +87,18 @@ function getMigrateToVersion(to, postgrator) {
     return Promise.resolve(to);
 }
 
-function checkMigrations(migrations, migrationDirectory, detectVersionConflicts) {
+function checkMigrations(migrations, migrationDirectory) {
     if (!migrations || !migrations.length) {
         throw new Error(`No migration files found from "${migrationDirectory}"`);
     }
-    if (detectVersionConflicts) {
-        checkVersionConflicts(migrations);
-    }
 }
 
-function checkVersionConflicts(migrations) {
-    const conflictingMigrationFileNamesString = getConflictingMigrationFileNamesString(migrations);
-    if (conflictingMigrationFileNamesString) {
-        throw new Error(`Conflicting migration file versions:\n${conflictingMigrationFileNamesString}`);
-    }
-}
-
-function getConflictingMigrationFileNamesString(migrations) {
-    let conflictingMigrationFileNamesString = '';
-
-    const conflictingMigrations = getConflictingMigrations(migrations);
-    if (conflictingMigrations && conflictingMigrations.length > 0) {
-        const conflictingMigrationFileNames = getMigrationFileNames(conflictingMigrations);
-        conflictingMigrationFileNamesString = conflictingMigrationFileNames.join('\n');
-    }
-    return conflictingMigrationFileNamesString;
-}
-
-function getMigrationFileNames(migrations) {
-    return migrations.map((migration) => migration.filename);
-}
-
-function getConflictingMigrations(migrations) {
-    let conflictingMigrations = [];
-
-    migrations.forEach((migrationA) => {
-        const newConflicting = migrations.filter((migrationB) => {
-            return areConflictingMigrations(migrationA, migrationB);
-        });
-        conflictingMigrations = conflictingMigrations.concat(newConflicting);
-    });
-
-    return conflictingMigrations;
-}
-
-function areConflictingMigrations(migrationA, migrationB) {
-    return migrationA.action === migrationB.action
-        && migrationA.version === migrationB.version
-        && migrationA.filename !== migrationB.filename;
-}
-
-function migrate(postgrator, to, detectVersionConflicts, migrationDirectory) {
+function migrate(postgrator, to, migrationDirectory) {
     let toVersion;
 
     return postgrator.getMigrations()
         .then((migrations) => {
-            checkMigrations(migrations, migrationDirectory, detectVersionConflicts);
+            checkMigrations(migrations, migrationDirectory);
         })
         .then(() => {
             return getMigrateToVersion(to, postgrator);
@@ -254,9 +210,6 @@ function run(commandLineArgs, callback) {
         return;
     }
 
-    const detectVersionConflicts = postgratorConfig['detect-version-conflicts'] || commandLineArgs['detect-version-conflicts'];
-    delete postgratorConfig['detect-version-conflicts']; // It's not postgrator but postgrator-cli setting
-
     const migrateTo = getMigrateToNumber(commandLineArgs.to);
 
     getPassword(postgratorConfig, (password) => {
@@ -282,7 +235,7 @@ function run(commandLineArgs, callback) {
             (migration) => logMessage(`running ${migration.filename}`)
         );
 
-        const migratePromise = migrate(postgrator, migrateTo, detectVersionConflicts, postgratorConfig.migrationDirectory);
+        const migratePromise = migrate(postgrator, migrateTo, postgratorConfig.migrationDirectory);
 
         promiseToCallback(migratePromise, (err, migrations) => {
             // connection is closed, or will close in the case of SQL Server

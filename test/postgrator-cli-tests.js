@@ -460,8 +460,7 @@ function buildTestsForOptions(options) {
                 undefined,
                 'Migrations were run although there were migration files with same number'
             );
-            assert(err.message.indexOf('Conflicting migration file versions:') >= 0, 'No migration conflicts were detected');
-            assert(err.message.indexOf('002') >= 0, 'No correct migration conflict was detected');
+            assert(err.message.indexOf('Two migrations found with version 2 and action do') >= 0, 'No migration conflicts were detected');
             return callback();
         });
     });

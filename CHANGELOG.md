@@ -1,5 +1,12 @@
 # Changelog
 
+## 4.0.0
+## May, NN, 2020
+* **Breaking** Node.js 10 or later required
+* Add support for node 14.x.x
+* Add support for pg 8.x.x
+* Removed option -t, --detect-version-conflicts. Conflicts are now always detected.
+
 ## 3.3.0
 ### September 9, 2019
 * Ask password if -p or --password parameter without value is given or if config file does not contain password.

@@ -2,7 +2,7 @@
 
 Command line SQL database migration tool using SQL scripts. For PostgreSQL, MySQL and SQL Server.
 
-Version control your database using plain old SQL files.
+Version control your SQL database using plain old SQL files.
 
 Supports also undoing migrations.
 
