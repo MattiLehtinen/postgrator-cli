@@ -458,7 +458,7 @@ function buildTestsForOptions(options) {
             assert.strictEqual(
                 migrations,
                 undefined,
-                'Migrations were run although there were migration files with same number'
+                'Migrations were run although there were migration files with same number',
             );
             assert(err.message.indexOf('Two migrations found with version 2 and action do') >= 0, 'No migration conflicts were detected');
             return callback();

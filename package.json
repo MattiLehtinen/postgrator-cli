@@ -52,13 +52,13 @@
   "license": "MIT",
   "dependencies": {
     "command-line-args": "^5.1.1",
-    "command-line-usage": "^5.0.5",
+    "command-line-usage": "^6.1.0",
     "postgrator": "^4.0.0"
   },
   "devDependencies": {
     "async": "3.2.0",
     "crlf": "^1.1.1",
-    "eslint": "^5.16.0",
+    "eslint": "^7.0.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
     "pg": "^8.2.1"

@@ -228,11 +228,11 @@ function run(commandLineArgs, callback) {
         // Postgrator events
         postgrator.on(
             'validation-started',
-            (migration) => logMessage(`verifying checksum of migration ${migration.filename}`)
+            (migration) => logMessage(`verifying checksum of migration ${migration.filename}`),
         );
         postgrator.on(
             'migration-started',
-            (migration) => logMessage(`running ${migration.filename}`)
+            (migration) => logMessage(`running ${migration.filename}`),
         );
 
         const migratePromise = migrate(postgrator, migrateTo, postgratorConfig.migrationDirectory);
