@@ -8,7 +8,8 @@ const readline = require('readline');
 const commandLineOptions = require('../command-line-options');
 const postgratorCli = require('../postgrator-cli');
 
-const defaultConfigFileName = 'postgrator.json';
+const MAX_REVISION = 5;
+const DEFAULT_CONFIG_FILE_NAME = 'postgrator.json';
 const optionList = commandLineOptions.optionList; // eslint-disable-line prefer-destructuring
 const originalConsoleLog = console.log;
 
@@ -57,11 +58,11 @@ function deleteConfigFile(file) {
 }
 
 function copyConfigToDefaultFile() {
-    copyConfigToFile(defaultConfigFileName);
+    copyConfigToFile(DEFAULT_CONFIG_FILE_NAME);
 }
 
 function deleteDefaultConfigFile() {
-    deleteConfigFile(defaultConfigFileName);
+    deleteConfigFile(DEFAULT_CONFIG_FILE_NAME);
 }
 
 function getDefaultOptions() {
@@ -234,8 +235,8 @@ function buildTestsForOptions(options) {
         postgratorCli.run(options, (err, migrations) => {
             restoreOptions();
             assert.ifError(err);
-            assert.equal(migrations.length, 4);
-            assert.equal(migrations[migrations.length - 1].version, 4);
+            assert.equal(migrations.length, MAX_REVISION);
+            assert.equal(migrations[migrations.length - 1].version, MAX_REVISION);
             return callback();
         });
     });
@@ -254,7 +255,7 @@ function buildTestsForOptions(options) {
             restoreOptions();
             deleteDefaultConfigFile();
             assert.ifError(err);
-            assert.equal(migrations.length, 4);
+            assert.equal(migrations.length, MAX_REVISION);
             return callback();
         });
     });
@@ -271,7 +272,7 @@ function buildTestsForOptions(options) {
         postgratorCli.run(options, (err, migrations) => {
             restoreOptions();
             assert.ifError(err);
-            assert.equal(migrations.length, 4);
+            assert.equal(migrations.length, MAX_REVISION);
             return callback();
         });
     });
