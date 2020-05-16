@@ -3,9 +3,9 @@
 ## 4.0.0
 ## May, NN, 2020
 * **Breaking** Node.js 10 or later required
+* **Breaking** Removed option -t, --detect-version-conflicts. Conflicts are now always detected.
 * Add support for node 14.x.x
 * Add support for pg 8.x.x
-* Removed option -t, --detect-version-conflicts. Conflicts are now always detected.
 
 ## 3.3.0
 ### September 9, 2019

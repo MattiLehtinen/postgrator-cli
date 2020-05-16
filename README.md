@@ -10,6 +10,8 @@ Uses [Postgrator](https://github.com/rickbergfalk/postgrator) node.js library de
 
 ## Installation
 
+*As of postgrator-cli 4 Node.js version 10 or greater is required*
+
 ```
 npm install -g postgrator-cli
 ```
@@ -23,9 +25,10 @@ npm install postgrator-cli --save-dev
 And install the appropriate DB engine(s) if not installed yet:
 
 ```
-npm install pg@7
+npm install pg@8
 npm install mysql@2
-npm install mssql@4
+npm install mysql2@2
+npm install mssql@6
 ```
 
 See the [Postgrator](https://github.com/rickbergfalk/postgrator) documentation for more information about the supported engines.
@@ -44,18 +47,43 @@ migrations/
   |- 002.undo.optional-description-of-script.sql
   |- 003.do.sql
   |- 003.undo.sql
+  |- 004.do.js
+  |- 004.undo.js
   |- ... and so on
 ```
 
-The files must follow the convention [version].[action].[optional-description].sql.
+The files must follow the convention
+[version].[action].[optional-description].sql or
+[version].[action].[optional-description].js
 
-**Version** must be a number, but you may start and increment the numbers in any way you'd like.
-If you choose to use a purely sequential numbering scheme instead of something based off a timestamp,
-you will find it helpful to start with 000s or some large number for file organization purposes.
+**Version** must be a number, but you may start and increment the numbers in any
+way you'd like. If you choose to use a purely sequential numbering scheme
+instead of something based off a timestamp, you will find it helpful to start
+with 000s or some large number for file organization purposes.
 
-**Action** must be either "do" or "undo". Do implements the version, and undo undoes it.
+**Action** must be either "do" or "undo". Do implements the version, and undo
+undoes it.
 
-**Optional-description** can be a label or tag to help keep track of what happens inside the script. Descriptions should not contain periods.
+**Optional-description** can be a label or tag to help keep track of what
+happens inside the script. Descriptions should not contain periods.
+
+**SQL or JS** You have a choice of either using a plain SQL file or you can also
+generate your SQL via a javascript module. The javascript module should export a
+function called generateSql() that returns back a string representing the SQL.
+For example:
+
+```js
+module.exports.generateSql = function () {
+  return (
+    "CREATE USER transaction_user WITH PASSWORD '" +
+    process.env.TRANSACTION_USER_PASSWORD +
+    "'"
+  )
+}
+```
+
+You might want to choose the JS file approach, in order to make use (secret)
+environment variables such as the above.
 
 ### The tool
 
@@ -104,8 +132,6 @@ postgrator [[--to=]<version>] [--config=<config>]
   -u, --username database               Username
   -p, --password password               Password
   -m, --migration-directory directory   A directory to run migration files from. Default: 'migrations''
-  -t, --detect-version-conflicts        Show an error and do not run any migrations if there are multiple migration
-                                        files with same version number
   -s, --secure                          Secure connection (Azure). Default: false
   -c, --config file                     Load configuration from a JSON file. With a configuration file you can also
                                         use additional configuration parameters available on postgrator. See syntax
