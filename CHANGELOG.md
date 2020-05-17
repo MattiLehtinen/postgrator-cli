@@ -1,7 +1,7 @@
 # Changelog
 
 ## 4.0.0
-## May, NN, 2020
+## May, 17, 2020
 * **Breaking** Node.js 10 or later required
 * **Breaking** Removed option -t, --detect-version-conflicts. Conflicts are now always detected.
 * Add support for node 14.x.x
