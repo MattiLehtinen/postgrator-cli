@@ -5,6 +5,5 @@
     "port": 5432,
     "database": "postgrator",
     "username": "postgrator",
-    "password": "postgrator",
-    "detect-version-conflicts": true
+    "password": "postgrator"
 }

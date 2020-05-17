@@ -142,7 +142,6 @@ function buildTestsForOptions(options) {
     tests.push((callback) => {
         console.log('\n----- testing migration to 000 with conflict detection-----');
         options.to = 0;
-        options['detect-version-conflicts'] = true;
 
         postgratorCli.run(options, (err, migrations) => {
             restoreOptions();
@@ -450,7 +449,6 @@ function buildTestsForOptions(options) {
     tests.push((callback) => {
         console.log('\n----- testing detecting migration files with same number-----');
         options.config = '';
-        options['detect-version-conflicts'] = true;
         options.to = 3;
         options['migration-directory'] = 'test/conflicting-migrations';
 
