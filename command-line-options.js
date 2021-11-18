@@ -44,8 +44,8 @@ const optionDefinitions = [
         alias: 's', type: Boolean,
     },
     {
-        name: 'config', description: 'Load configuration from a JSON file.  With a configuration file you can also use additional configuration parameters available on postgrator. See syntax from https://github.com/rickbergfalk/postgrator',
-        alias: 'c', type: String, typeLabel: '{underline file}',
+        name: 'no-config', description: 'Disable config loading',
+        type: Boolean,
     },
     {
         name: 'version', description: 'Print version.',
@@ -63,8 +63,7 @@ const sections = [
         content: {
             options: { columns: [{ name: 'one', maxWidth: 200 }] },
             data: [
-                { one: 'postgrator [[--to=]version] [--database=<db>] [--driver=<driver>] [--host=<host>] [--port=<port>] [--username=<username>] [--password=<password>]' },
-                { one: 'postgrator [[--to=]version] [--config=<config>]' },
+                { one: 'postgrator [[--to=]version] [--database=<db>] [--driver=<driver>] [--host=<host>] [--port=<port>] [--username=<username>] [--password=<password>] [--no-config]' },
             ],
         },
     },
@@ -80,15 +79,15 @@ const sections = [
                 example: 'postgrator 23 --host 127.0.0.1 --database sampledb --username testuser --password testpassword',
             },
             {
-                desc: '2. Use configuration file',
-                example: 'postgrator 2 --config myConfig.json',
+                desc: '2. Explicitly disable loading configuration file',
+                example: 'postgrator 2 --no-config',
             },
             {
-                desc: '3. Use default configuration file (postgrator.json)',
+                desc: '3. Use default configuration file to migrate to version 5',
                 example: 'postgrator 5',
             },
             {
-                desc: '4. Migrate to latest version using default configuration file (postgrator.json)',
+                desc: '4. Migrate to latest version using the configuration files',
                 example: 'postgrator',
             },
         ],

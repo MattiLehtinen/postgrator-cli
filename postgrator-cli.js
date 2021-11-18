@@ -2,22 +2,13 @@ const fs = require('fs');
 const path = require('path');
 const getUsage = require('command-line-usage');
 const Postgrator = require('postgrator');
+const { cosmiconfig } = require('cosmiconfig');
 const pjson = require('./package.json');
 const commandLineOptions = require('./command-line-options');
-
-const DEFAULT_CONFIG_FILE = 'postgrator.json';
 
 function printUsage() {
     const usage = getUsage(commandLineOptions.sections);
     console.log(usage);
-}
-
-function promiseToCallback(promise, callback) {
-    promise.then((data) => {
-        process.nextTick(callback, null, data);
-    }, (err) => {
-        process.nextTick(callback, err);
-    });
 }
 
 function logMessage(message) {
@@ -33,32 +24,10 @@ function getMigrateToNumber(toArgument) {
     return Number(toArgument).toString();
 }
 
-function hasDefaultConfigFile() {
-    const defaultConfigFilePath = path.join(process.cwd(), DEFAULT_CONFIG_FILE);
-    return fileIsAccessible(defaultConfigFilePath);
-}
-
-function getPostgratorConfigFromFile(configFile) {
-    const configFilePath = getAbsolutePath(configFile);
-    if (!fileIsAccessible(configFilePath)) {
-        throw new Error(`Config file not found: ${configFilePath}`);
-    }
-    return require(configFilePath);
-}
-
 function getAbsolutePath(fileOrDirectory) {
     return (path.isAbsolute(fileOrDirectory))
         ? fileOrDirectory
         : path.join(process.cwd(), fileOrDirectory);
-}
-
-function fileIsAccessible(filePath) {
-    try {
-        fs.accessSync(filePath, fs.F_OK);
-        return true;
-    } catch (e) {
-        return false;
-    }
 }
 
 function getPostgratorConfigFromCommandLineArgs(commandLineArgs) {
@@ -120,13 +89,11 @@ function migrate(postgrator, to, migrationDirectory) {
 /**
  * Gets password from postgrator config or as user input
  * @param {object} postgratorConfig
- * @param {Function} callback
- * @returns {string} password
+ * @returns {string} Promise<password>
  */
-function getPassword(postgratorConfig, callback) {
+async function getPassword(postgratorConfig) {
     if (postgratorConfig.password !== null && postgratorConfig.password !== undefined) {
-        callback(postgratorConfig.password);
-        return;
+        return postgratorConfig.password;
     }
 
     // Ask password if it is not set
@@ -138,13 +105,6 @@ function getPassword(postgratorConfig, callback) {
     });
 
     rl.stdoutMuted = true;
-
-    rl.question('Password: ', (password) => {
-        rl.history = rl.history.slice(1);
-        rl.close();
-        console.log('\n');
-        callback(password);
-    });
 
     // eslint-disable-next-line no-underscore-dangle
     rl._writeToOutput = function _writeToOutput(stringToWrite) {
@@ -162,41 +122,40 @@ function getPassword(postgratorConfig, callback) {
             rl.output.write(stringToWrite);
         }
     };
+
+    const password = await new Promise((res) => rl.question('Password: ', res));
+    rl.history = rl.history.slice(1);
+    rl.close();
+    console.log('\n');
+    return password;
 }
 
 /* -------------------------- Main ---------------------------------- */
 
-function run(commandLineArgs, callback) {
+async function run(commandLineArgs) {
     // Print help if requested
     if (commandLineArgs.help) {
         printUsage();
-        callback(null);
-        return;
+        return Promise.resolve();
     }
 
     // Print version if requested
     if (commandLineArgs.version) {
         console.log(`Version: ${pjson.version}`);
-        callback(null);
-        return;
-    }
-
-    // Search for default config file if not specified
-    if (!commandLineArgs.config && hasDefaultConfigFile()) {
-        commandLineArgs.config = DEFAULT_CONFIG_FILE;
+        return Promise.resolve();
     }
 
     let postgratorConfig;
-    if (commandLineArgs.config) {
-        try {
-            postgratorConfig = getPostgratorConfigFromFile(commandLineArgs.config);
-        } catch (err) {
-            callback(err);
-            return;
-        }
-    } else {
+    if (!commandLineArgs.noConfig) {
+        const explorer = cosmiconfig('postgrator');
+        const result = await explorer.search();
+        postgratorConfig = (!result || result.isEmpty) ? null : result.config;
+    }
+
+    if (!postgratorConfig) {
         postgratorConfig = getPostgratorConfigFromCommandLineArgs(commandLineArgs);
     }
+
     if (!postgratorConfig.migrationDirectory) {
         postgratorConfig.migrationDirectory = commandLineOptions.DEFAULT_MIGRATION_DIRECTORY;
     }
@@ -206,45 +165,34 @@ function run(commandLineArgs, callback) {
         if (!commandLineArgs.config && commandLineArgs['migration-directory'] === commandLineOptions.DEFAULT_MIGRATION_DIRECTORY) {
             printUsage();
         }
-        callback(new Error(`Directory "${postgratorConfig.migrationDirectory}" does not exist.`));
-        return;
+        return Promise.reject(new Error(`Directory "${postgratorConfig.migrationDirectory}" does not exist.`));
     }
 
     const migrateTo = getMigrateToNumber(commandLineArgs.to);
 
-    getPassword(postgratorConfig, (password) => {
-        postgratorConfig.password = password;
+    postgratorConfig.password = await getPassword(postgratorConfig);
 
-        // Create postgrator
-        let postgrator;
-        try {
-            postgrator = new Postgrator(postgratorConfig);
-        } catch (err) {
-            printUsage();
-            callback(err);
-            return;
-        }
+    // Create postgrator
+    let postgrator;
+    try {
+        postgrator = new Postgrator(postgratorConfig);
+    } catch (err) {
+        printUsage();
+        return Promise.reject(err);
+    }
 
-        // Postgrator events
-        postgrator.on(
-            'validation-started',
-            (migration) => logMessage(`verifying checksum of migration ${migration.filename}`),
-        );
-        postgrator.on(
-            'migration-started',
-            (migration) => logMessage(`running ${migration.filename}`),
-        );
+    // Postgrator events
+    postgrator.on(
+        'validation-started',
+        (migration) => logMessage(`verifying checksum of migration ${migration.filename}`),
+    );
+    postgrator.on(
+        'migration-started',
+        (migration) => logMessage(`running ${migration.filename}`),
+    );
 
-        const migratePromise = migrate(postgrator, migrateTo, postgratorConfig.migrationDirectory);
-
-        promiseToCallback(migratePromise, (err, migrations) => {
-            // connection is closed, or will close in the case of SQL Server
-            if (err && typeof err === 'string') {
-                err = new Error(err);
-            }
-            return callback(err, migrations);
-        });
-    });
+    return migrate(postgrator, migrateTo, postgratorConfig.migrationDirectory)
+        .catch((err) => Promise.reject(err && typeof err === 'string' ? new Error(err) : err));
 }
 
 module.exports.run = run;

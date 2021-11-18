@@ -1,5 +1,5 @@
 {
-    "migrationDirectory": "test/non-existing-migrations-directory",
+    "migrationDirectory": "../migrations",
     "driver": "pg",
     "host": "127.0.0.1",
     "port": 5432,

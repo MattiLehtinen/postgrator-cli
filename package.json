@@ -53,14 +53,16 @@
   "dependencies": {
     "command-line-args": "^5.1.1",
     "command-line-usage": "^6.1.0",
+    "cosmiconfig": "^7.0.1",
     "postgrator": "^4.0.0"
   },
   "devDependencies": {
-    "async": "3.2.0",
     "crlf": "^1.1.1",
     "eslint": "^7.0.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
+    "mock-cwd": "^1.0.0",
+    "p-each-series": "^2.2.0",
     "pg": "^8.2.1"
   }
 }
