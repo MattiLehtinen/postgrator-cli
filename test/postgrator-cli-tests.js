@@ -148,13 +148,15 @@ function buildTestsForOptions(options) {
         });
     });
 
+    tests.push(resetMigrations);
+
     tests.push(async () => {
         console.log('\n----- testing using latest revision without specifying to-----');
         options.to = getDefaultOptions().to; // is 'max'
 
         const migrations = await postgratorCli.run(options);
         restoreOptions();
-        assert.equal(migrations.length, MAX_REVISION - 2);
+        assert.equal(migrations.length, MAX_REVISION);
         assert.equal(migrations[migrations.length - 1].version, MAX_REVISION);
     });
 
@@ -219,6 +221,22 @@ function buildTestsForOptions(options) {
                 assert(err.message.indexOf('does not exist') >= 0);
                 assert(log.indexOf('Examples') < 0, "Help was displayed when shouldn't");
             }
+        });
+    });
+
+    tests.push(resetMigrations);
+
+    tests.push(() => {
+        console.log('\n----- testing ignoring config file -----');
+        options['migration-directory'] = '../migrations';
+        options['no-config'] = true;
+        options.to = 'max';
+
+        return mockCwd(path.join(__dirname, 'config-with-non-existing-directory'), async () => {
+            const migrations = await postgratorCli.run(options);
+            restoreOptions();
+            assert.equal(migrations.length, MAX_REVISION);
+            assert.equal(migrations[migrations.length - 1].version, MAX_REVISION);
         });
     });
 

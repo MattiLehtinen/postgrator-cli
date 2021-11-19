@@ -145,15 +145,11 @@ async function run(commandLineArgs) {
         return Promise.resolve();
     }
 
-    let postgratorConfig;
-    if (!commandLineArgs.noConfig) {
+    let postgratorConfig = getPostgratorConfigFromCommandLineArgs(commandLineArgs);
+    if (!commandLineArgs['no-config']) {
         const explorer = cosmiconfig('postgrator');
         const result = await explorer.search();
-        postgratorConfig = (!result || result.isEmpty) ? null : result.config;
-    }
-
-    if (!postgratorConfig) {
-        postgratorConfig = getPostgratorConfigFromCommandLineArgs(commandLineArgs);
+        postgratorConfig = (!result || result.isEmpty) ? postgratorConfig : result.config;
     }
 
     if (!postgratorConfig.migrationDirectory) {
