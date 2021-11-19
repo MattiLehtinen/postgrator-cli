@@ -89,7 +89,7 @@ environment variables such as the above.
 
 You can specify all the parameters from command line (see below) but the easiest way is to:
 
-* Create `postgrator.json` configuration file. For example:
+* Create `.postgratorrc.json`, or any config file supported by [cosmiconfig](https://github.com/davidtheclark/cosmiconfig). For example:
 
 ```
 {
@@ -103,7 +103,7 @@ You can specify all the parameters from command line (see below) but the easiest
 }
 ```
 
-* Migrate to latest version (it looks settings by default from `postgrator.json`):
+* Migrate to latest version (it looks settings by default from `.postgratorrc.json`, etc):
 ```
 $ postgrator
 ```
@@ -117,8 +117,7 @@ $ postgrator 4
 ### Synopsis
 
 ```
-postgrator [[--to=]<version>] --database=<db> [--driver=<driver>] [--host=<host>] [--port=<port>] [--username=<username>] [--password=<password>]
-postgrator [[--to=]<version>] [--config=<config>]
+postgrator [[--to=]<version>] --database=<db> [--driver=<driver>] [--host=<host>] [--port=<port>] [--username=<username>] [--password=<password>] [--no-config]
 ```
 
 ### Options
@@ -133,9 +132,7 @@ postgrator [[--to=]<version>] [--config=<config>]
   -p, --password password               Password
   -m, --migration-directory directory   A directory to run migration files from. Default: 'migrations''
   -s, --secure                          Secure connection (Azure). Default: false
-  -c, --config file                     Load configuration from a JSON file. With a configuration file you can also
-                                        use additional configuration parameters available on postgrator. See syntax
-                                        from https://github.com/rickbergfalk/postgrator
+  --no-config                           Do not load options from a configuration file.
   -v, --version                         Print version.
   -?, --help                            Print this usage guide.
 
@@ -143,10 +140,10 @@ Examples
 
   1. Specify parameters on command line                       postgrator 23 --host 127.0.0.1 --database sampledb
                                                               --username testuser --password testpassword
-  2. Use configuration file                                   postgrator 2 --config myConfig.json
-  3. Use default configuration file (postgrator.json)         postgrator 5
+  2. Explicitly disable loading configuration file            postgrator 2 --no-config
+  3. Use default configuration file to migrate to version 5   postgrator 5
   4. Migrate to latest version using default configuration    postgrator
-  file (postgrator.json)
+  file (.postgratorrc.json, etc)
 ```
 
 ## Tests
