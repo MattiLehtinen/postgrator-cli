@@ -3,6 +3,7 @@ const commandLineArgs = require('command-line-args');
 const path = require('path');
 const readline = require('readline');
 const eachSeries = require('p-each-series');
+const fromEvent = require('p-event');
 const { mockCwd } = require('mock-cwd');
 
 const commandLineOptions = require('../command-line-options');
@@ -31,7 +32,7 @@ function removeVersionTable(options) {
         password: options.password,
     };
     console.log(`\n----- ${config.driver} removing tables -----`);
-    const Postgrator = require('../node_modules/postgrator/postgrator.js');
+    const Postgrator = require('postgrator');
     const pg = new Postgrator(config);
 
     return pg.runQuery('DROP TABLE IF EXISTS schemaversion, animal, person').catch((err) => {
@@ -43,7 +44,6 @@ function removeVersionTable(options) {
 function getDefaultOptions() {
     return commandLineArgs(optionList, { partial: true });
 }
-
 
 /* Build a set of tests for a given config.
    This will be helpful when we want to run the same kinds of tests on
@@ -262,7 +262,7 @@ function buildTestsForOptions(options) {
 
         postgratorCli.run(options);
         // this error is not thrown down the chain so it cannot be caught
-        const err = await new Promise((res) => process.once('uncaughtException', res));
+        const err = await fromEvent(process, 'uncaughtException');
         assert(err, 'ERR_INVALID_ARG_TYPE');
         restoreOptions();
     });
@@ -356,7 +356,6 @@ const options = {
 
 // Command line parameters
 buildTestsForOptions(options);
-
 
 // Run the tests
 console.log(`Running ${tests.length} tests`);

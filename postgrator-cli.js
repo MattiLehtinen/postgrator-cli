@@ -123,7 +123,7 @@ async function getPassword(postgratorConfig) {
         }
     };
 
-    const password = await new Promise((res) => rl.question('Password: ', res));
+    const password = await new Promise((res) => { rl.question('Password: ', res); });
     rl.history = rl.history.slice(1);
     rl.close();
     console.log('\n');
