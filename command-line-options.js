@@ -1,8 +1,10 @@
 /* eslint max-len: 0 */
 
-const pjson = require('./package.json');
+import { readFileSync } from 'fs';
 
-const DEFAULT_MIGRATION_DIRECTORY = 'migrations';
+const pjson = JSON.parse(readFileSync(new URL('./package.json', import.meta.url)));
+
+export const DEFAULT_MIGRATION_DIRECTORY = 'migrations';
 
 /* eslint-disable object-property-newline */
 
@@ -57,7 +59,9 @@ const optionDefinitions = [
     },
 ];
 
-const sections = [
+export { optionDefinitions as optionList };
+
+export const sections = [
     {
         header: 'Postgrator CLI',
         content: {
@@ -100,7 +104,3 @@ const sections = [
         ],
     },
 ];
-
-module.exports.sections = sections;
-module.exports.optionList = optionDefinitions;
-module.exports.DEFAULT_MIGRATION_DIRECTORY = DEFAULT_MIGRATION_DIRECTORY;

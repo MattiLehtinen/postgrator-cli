@@ -1,13 +1,14 @@
-const fs = require('fs');
-const path = require('path');
-const getUsage = require('command-line-usage');
-const Postgrator = require('postgrator');
-const { cosmiconfig } = require('cosmiconfig');
-const pjson = require('./package.json');
-const commandLineOptions = require('./command-line-options');
+import { existsSync, readFileSync } from 'fs';
+import path from 'path';
+import getUsage from 'command-line-usage';
+import Postgrator from 'postgrator';
+import { cosmiconfig } from 'cosmiconfig';
+import { DEFAULT_MIGRATION_DIRECTORY, sections } from './command-line-options.js'; // eslint-disable-line import/extensions
+
+const pjson = JSON.parse(readFileSync(new URL('./package.json', import.meta.url)));
 
 function printUsage() {
-    const usage = getUsage(commandLineOptions.sections);
+    const usage = getUsage(sections);
     console.log(usage);
 }
 
@@ -97,7 +98,7 @@ async function getPassword(postgratorConfig) {
     }
 
     // Ask password if it is not set
-    const readline = require('readline');
+    const readline = (await import('readline')).default;
 
     const rl = readline.createInterface({
         input: process.stdin,
@@ -132,7 +133,8 @@ async function getPassword(postgratorConfig) {
 
 /* -------------------------- Main ---------------------------------- */
 
-async function run(commandLineArgs) {
+// eslint-disable-next-line import/prefer-default-export
+export async function run(commandLineArgs) {
     // Print help if requested
     if (commandLineArgs.help) {
         printUsage();
@@ -153,12 +155,12 @@ async function run(commandLineArgs) {
     }
 
     if (!postgratorConfig.migrationDirectory) {
-        postgratorConfig.migrationDirectory = commandLineOptions.DEFAULT_MIGRATION_DIRECTORY;
+        postgratorConfig.migrationDirectory = DEFAULT_MIGRATION_DIRECTORY;
     }
     postgratorConfig.migrationDirectory = getAbsolutePath(postgratorConfig.migrationDirectory);
 
-    if (!fs.existsSync(postgratorConfig.migrationDirectory)) {
-        if (!commandLineArgs.config && commandLineArgs['migration-directory'] === commandLineOptions.DEFAULT_MIGRATION_DIRECTORY) {
+    if (!existsSync(postgratorConfig.migrationDirectory)) {
+        if (!commandLineArgs.config && commandLineArgs['migration-directory'] === DEFAULT_MIGRATION_DIRECTORY) {
             printUsage();
         }
         return Promise.reject(new Error(`Directory "${postgratorConfig.migrationDirectory}" does not exist.`));
@@ -190,5 +192,3 @@ async function run(commandLineArgs) {
     return migrate(postgrator, migrateTo, postgratorConfig.migrationDirectory)
         .catch((err) => Promise.reject(err && typeof err === 'string' ? new Error(err) : err));
 }
-
-module.exports.run = run;

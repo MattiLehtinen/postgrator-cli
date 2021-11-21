@@ -1,16 +1,19 @@
-const assert = require('assert');
-const commandLineArgs = require('command-line-args');
-const path = require('path');
-const readline = require('readline');
-const eachSeries = require('p-each-series');
-const fromEvent = require('p-event');
-const { mockCwd } = require('mock-cwd');
+import assert from 'assert';
+import commandLineArgs from 'command-line-args';
+import path from 'path';
+import readline from 'readline';
+import eachSeries from 'p-each-series';
+import { pEvent as fromEvent } from 'p-event';
+import { dirname } from 'dirname-filename-esm';
 
-const commandLineOptions = require('../command-line-options');
-const postgratorCli = require('../postgrator-cli');
+import { mockCwd } from 'mock-cwd';
+
+import { optionList } from '../command-line-options.js'; // eslint-disable-line import/extensions
+import { run } from '../postgrator-cli.js'; // eslint-disable-line import/extensions
+
+const __dirname = dirname(import.meta); // eslint-disable-line no-underscore-dangle
 
 const MAX_REVISION = 5;
-const optionList = commandLineOptions.optionList; // eslint-disable-line prefer-destructuring
 const originalConsoleLog = console.log;
 
 const tests = [];
@@ -21,7 +24,7 @@ function consoleLogCapture(...args) {
     log += [].slice.call(args);
 }
 
-function removeVersionTable(options) {
+async function removeVersionTable(options) {
     const config = {
         migrationDirectory: options['migration-directory'],
         driver: options.driver,
@@ -32,7 +35,7 @@ function removeVersionTable(options) {
         password: options.password,
     };
     console.log(`\n----- ${config.driver} removing tables -----`);
-    const Postgrator = require('postgrator');
+    const Postgrator = (await import('postgrator')).default;
     const pg = new Postgrator(config);
 
     return pg.runQuery('DROP TABLE IF EXISTS schemaversion, animal, person').catch((err) => {
@@ -60,7 +63,7 @@ function buildTestsForOptions(options) {
         console.log('\n----- Reset migrations-----');
         const originalTo = options.to;
         options.to = 0;
-        await postgratorCli.run(options);
+        await run(options);
         options.to = originalTo;
     }
 
@@ -74,7 +77,7 @@ function buildTestsForOptions(options) {
         options.help = true;
 
         console.log = consoleLogCapture;
-        const migrations = await postgratorCli.run(options);
+        const migrations = await run(options);
         console.log = originalConsoleLog;
         restoreOptions();
         assert.strictEqual(migrations, undefined);
@@ -86,7 +89,7 @@ function buildTestsForOptions(options) {
         options.version = true;
 
         console.log = consoleLogCapture;
-        const migrations = await postgratorCli.run(options);
+        const migrations = await run(options);
         console.log = originalConsoleLog;
         restoreOptions();
         assert.strictEqual(migrations, undefined);
@@ -95,7 +98,7 @@ function buildTestsForOptions(options) {
 
     tests.push(async () => {
         console.log('\n----- testing migration to 003 -----');
-        const migrations = await postgratorCli.run(options);
+        const migrations = await run(options);
         assert.equal(migrations.length, 3);
         assert.equal(migrations[2].version, 3);
     });
@@ -104,7 +107,7 @@ function buildTestsForOptions(options) {
         console.log('\n----- testing migration to 000 with conflict detection-----');
         options.to = 0;
 
-        const migrations = await postgratorCli.run(options);
+        const migrations = await run(options);
         restoreOptions();
         assert.equal(migrations.length, 3);
         assert.equal(migrations[2].version, 1);
@@ -114,7 +117,7 @@ function buildTestsForOptions(options) {
     tests.push(async () => {
         console.log('\n----- testing migration to 001 -----');
         options.to = 1;
-        const migrations = await postgratorCli.run(options);
+        const migrations = await run(options);
         restoreOptions();
         assert.equal(migrations.length, 1);
         assert.equal(migrations[0].version, 1);
@@ -128,7 +131,7 @@ function buildTestsForOptions(options) {
         options.database = '';
 
         return mockCwd(path.join(__dirname, 'sample-config'), async () => {
-            const migrations = await postgratorCli.run(options);
+            const migrations = await run(options);
             restoreOptions();
             assert.equal(migrations[migrations.length - 1].version, 3);
         });
@@ -141,7 +144,7 @@ function buildTestsForOptions(options) {
         options.database = '';
 
         return mockCwd(path.join(__dirname, 'sample-config'), async () => {
-            const migrations = await postgratorCli.run(options);
+            const migrations = await run(options);
             restoreOptions();
             assert.equal(migrations[0].version, 3);
             assert.equal(migrations[0].action, 'undo');
@@ -154,7 +157,7 @@ function buildTestsForOptions(options) {
         console.log('\n----- testing using latest revision without specifying to-----');
         options.to = getDefaultOptions().to; // is 'max'
 
-        const migrations = await postgratorCli.run(options);
+        const migrations = await run(options);
         restoreOptions();
         assert.equal(migrations.length, MAX_REVISION);
         assert.equal(migrations[migrations.length - 1].version, MAX_REVISION);
@@ -166,7 +169,7 @@ function buildTestsForOptions(options) {
         options.to = '';
 
         return mockCwd(path.join(__dirname, 'sample-config'), async () => {
-            const migrations = await postgratorCli.run(options);
+            const migrations = await run(options);
             restoreOptions();
             assert.equal(migrations.length, 0); // returns number of applied migrations
         });
@@ -179,7 +182,7 @@ function buildTestsForOptions(options) {
 
         console.log = consoleLogCapture;
         try {
-            await postgratorCli.run(options);
+            await run(options);
         } catch (err) {
             console.log = originalConsoleLog;
             restoreOptions();
@@ -196,7 +199,7 @@ function buildTestsForOptions(options) {
 
         console.log = consoleLogCapture;
         try {
-            await postgratorCli.run(options);
+            await run(options);
         } catch (err) {
             console.log = originalConsoleLog;
             restoreOptions();
@@ -213,7 +216,7 @@ function buildTestsForOptions(options) {
         console.log = consoleLogCapture;
         return mockCwd(path.join(__dirname, 'config-with-non-existing-directory'), async () => {
             try {
-                await postgratorCli.run(options);
+                await run(options);
             } catch (err) {
                 console.log = originalConsoleLog;
                 restoreOptions();
@@ -233,7 +236,7 @@ function buildTestsForOptions(options) {
         options.to = 'max';
 
         return mockCwd(path.join(__dirname, 'config-with-non-existing-directory'), async () => {
-            const migrations = await postgratorCli.run(options);
+            const migrations = await run(options);
             restoreOptions();
             assert.equal(migrations.length, MAX_REVISION);
             assert.equal(migrations[migrations.length - 1].version, MAX_REVISION);
@@ -249,7 +252,7 @@ function buildTestsForOptions(options) {
         options.database = '';
 
         return mockCwd(path.join(__dirname, 'config-with-other-directory'), async () => {
-            const migrations = await postgratorCli.run(options);
+            const migrations = await run(options);
             assert(migrations.length, 2);
             await resetMigrations();
             restoreOptions();
@@ -260,7 +263,7 @@ function buildTestsForOptions(options) {
         console.log('\n----- testing empty password-----');
         options.password = '';
 
-        postgratorCli.run(options);
+        run(options);
         // this error is not thrown down the chain so it cannot be caught
         const err = await fromEvent(process, 'uncaughtException');
         assert(err, 'ERR_INVALID_ARG_TYPE');
@@ -283,7 +286,7 @@ function buildTestsForOptions(options) {
             };
         };
 
-        return postgratorCli.run(options).catch((err) => {
+        return run(options).catch((err) => {
             restoreOptions();
             assert(passwordAsked);
             assert(err.length > 0);
@@ -309,7 +312,7 @@ function buildTestsForOptions(options) {
         };
 
         return mockCwd(path.join(__dirname, 'config-without-password'), async () => {
-            const migrations = await postgratorCli.run(options);
+            const migrations = await run(options);
             assert(migrations.length);
             assert(passwordAsked);
             await resetMigrations();
@@ -323,7 +326,7 @@ function buildTestsForOptions(options) {
         const defaultOptions = getDefaultOptions();
 
         console.log = consoleLogCapture;
-        return postgratorCli.run(defaultOptions).catch((err) => {
+        return run(defaultOptions).catch((err) => {
             console.log = originalConsoleLog;
             restoreOptions();
             assert.ok(log.indexOf('Examples') >= 0, 'No help was displayed');
@@ -336,7 +339,7 @@ function buildTestsForOptions(options) {
         options.to = 3;
         options['migration-directory'] = 'test/conflicting-migrations';
 
-        return postgratorCli.run(options).catch((err) => {
+        return run(options).catch((err) => {
             restoreOptions();
             assert(err.message.indexOf('Two migrations found with version 2 and action do') >= 0, 'No migration conflicts were detected');
         });

@@ -3,6 +3,7 @@
   "version": "4.0.0",
   "description": "Command line interface for Postgrator",
   "author": "Matti Lehtinen <matlehti@gmail.com> (https://twitter.com/MattiLehtinen)",
+  "type": "module",
   "bin": {
     "postgrator": "./index.js"
   },
@@ -58,12 +59,13 @@
   },
   "devDependencies": {
     "crlf": "^1.1.1",
+    "dirname-filename-esm": "^1.1.1",
     "eslint": "^8.2.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.3",
     "mock-cwd": "^1.0.0",
-    "p-each-series": "^2.2.0",
-    "p-event": "^4.2.0",
+    "p-each-series": "^3.0.0",
+    "p-event": "^5.0.1",
     "pg": "^8.2.1"
   }
 }
