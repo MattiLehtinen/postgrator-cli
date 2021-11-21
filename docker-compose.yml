@@ -1,0 +1,10 @@
+version: '3'
+services:
+  database:
+    image: ubuntu/postgres:latest # use latest official postgres version
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_USER=postgrator
+      - POSTGRES_PASSWORD=postgrator
+      - POSTGRES_DB=postgrator
