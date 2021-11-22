@@ -55,17 +55,26 @@
     "command-line-args": "^5.2.0",
     "command-line-usage": "^6.1.1",
     "cosmiconfig": "^7.0.1",
-    "postgrator": "^4.0.0"
+    "p-tap": "^4.0.0",
+    "postgrator": "^5.0.0"
   },
   "devDependencies": {
     "crlf": "^1.1.1",
     "dirname-filename-esm": "^1.1.1",
-    "eslint": "^8.2.0",
+    "eslint": "^8.3.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.3",
     "mock-cwd": "^1.0.0",
     "p-each-series": "^3.0.0",
     "p-event": "^5.0.1",
-    "pg": "^8.2.1"
+    "pg": "^8.7.1"
+  },
+  "peerDependencies": {
+    "pg": "^8.7.1"
+  },
+  "peerDependenciesMeta": {
+    "pg": {
+      "optional": true
+    }
   }
 }
