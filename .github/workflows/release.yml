@@ -23,8 +23,11 @@ jobs:
     - name: Lint
       run: npm run lint
 
-    - name: Start postgres
+    - name: Start databases
       run: docker-compose up -d
+
+    - name: Wait for databases to be available
+      run: sleep 10
 
     - name: Test
       run: npm test
@@ -33,5 +36,5 @@ jobs:
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
 
-    - name: Stop postgres
+    - name: Stop databases
       run: docker-compose down

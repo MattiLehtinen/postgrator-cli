@@ -237,7 +237,7 @@ function buildTestsForOptions(options) {
 
         run(options);
         // this error is not thrown down the chain so it cannot be caught
-        const err = await fromEvent(process, 'uncaughtException');
+        const err = await fromEvent(process, 'unhandledRejection');
         assert(err, 'ERR_INVALID_ARG_TYPE');
         restoreOptions();
     });
