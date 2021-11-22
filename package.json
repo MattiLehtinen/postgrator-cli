@@ -65,14 +65,24 @@
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.3",
     "mock-cwd": "^1.0.0",
+    "mssql": "^7.3.0",
+    "mysql": "^2.18.1",
     "p-each-series": "^3.0.0",
     "p-event": "^5.0.1",
     "pg": "^8.7.1"
   },
   "peerDependencies": {
+    "mssql": "^7.3.0",
+    "mysql": "^2.18.1",
     "pg": "^8.7.1"
   },
   "peerDependenciesMeta": {
+    "mssql": {
+      "optional": true
+    },
+    "mysql": {
+      "optional": true
+    },
     "pg": {
       "optional": true
     }

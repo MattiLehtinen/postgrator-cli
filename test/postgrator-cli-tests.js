@@ -34,6 +34,7 @@ async function removeVersionTable(options) {
         database: options.database,
         username: options.username,
         password: options.password,
+        secure: options.secure,
     };
     console.log(`\n----- ${config.driver} removing tables -----`);
     const { default: Postgrator } = await import('postgrator');
@@ -300,6 +301,42 @@ function buildTestsForOptions(options) {
         return run(options).catch((err) => {
             restoreOptions();
             assert(err.message.indexOf('Two migrations found with version 2 and action do') >= 0, 'No migration conflicts were detected');
+        });
+    });
+
+    tests.push(() => removeVersionTable({
+        ...options,
+        driver: 'mysql',
+        port: 3306,
+    }));
+
+    tests.push(async () => {
+        console.log('\n----- testing migration to 003 using mysql -----');
+
+        return mockCwd(path.join(__dirname, 'mysql-config'), async () => {
+            const migrations = await run(options);
+            assert.equal(migrations.length, 3);
+            assert.equal(migrations[2].version, 3);
+        });
+    });
+
+    tests.push(() => removeVersionTable({
+        ...options,
+        driver: 'mssql',
+        port: 1433,
+        database: 'master',
+        username: 'sa',
+        password: 'Postgrator123!',
+        secure: false,
+    }));
+
+    tests.push(async () => {
+        console.log('\n----- testing migration to 003 using mssql -----');
+
+        return mockCwd(path.join(__dirname, 'mssql-config'), async () => {
+            const migrations = await run(options);
+            assert.equal(migrations.length, 3);
+            assert.equal(migrations[2].version, 3);
         });
     });
 }

@@ -1,0 +1,9 @@
+{
+    "migrationPattern": "../migrations/*",
+    "driver": "mysql",
+    "host": "127.0.0.1",
+    "port": 3306,
+    "database": "postgrator",
+    "username": "postgrator",
+    "password": "postgrator"
+}
