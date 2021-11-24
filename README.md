@@ -10,7 +10,7 @@ Uses [Postgrator](https://github.com/rickbergfalk/postgrator) node.js library de
 
 ## Installation
 
-*As of postgrator-cli 4 Node.js version 10 or greater is required*
+*As of postgrator-cli 4 Node.js version 12 or greater is required*
 
 ```
 npm install -g postgrator-cli
@@ -27,7 +27,6 @@ And install the appropriate DB engine(s) if not installed yet:
 ```
 npm install pg@8
 npm install mysql@2
-npm install mysql2@2
 npm install mssql@6
 ```
 
@@ -131,7 +130,9 @@ postgrator [[--to=]<version>] --database=<db> [--driver=<driver>] [--host=<host>
   -u, --username database               Username
   -p, --password password               Password
   -m, --migration-directory directory   A directory to run migration files from. Default: 'migrations''
-  -s, --secure                          Secure connection (Azure). Default: false
+  -t --schema-table                     Table created to track schema version.
+  -c --validate-checksum                Validates checksum of existing SQL migration files already run prior to executing migrations.
+  -s, --ssl                             Enables ssl connections. When using the mysql driver it expects a string containing name of ssl profile.
   --no-config                           Do not load options from a configuration file.
   -v, --version                         Print version.
   -?, --help                            Print this usage guide.

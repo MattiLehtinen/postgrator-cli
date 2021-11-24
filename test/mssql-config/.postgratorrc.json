@@ -6,5 +6,5 @@
     "database": "master",
     "username": "sa",
     "password": "Postgrator123!",
-    "secure": false
+    "ssl": false
 }

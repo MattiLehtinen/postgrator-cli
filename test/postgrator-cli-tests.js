@@ -1,5 +1,4 @@
 import assert from 'assert';
-import commandLineArgs from 'command-line-args';
 import path from 'path';
 import readline from 'readline';
 import eachSeries from 'p-each-series';
@@ -9,7 +8,7 @@ import { dirname } from 'dirname-filename-esm';
 import { mockCwd } from 'mock-cwd';
 
 import getClient from '../lib/clients/index.js'; // eslint-disable-line import/extensions
-import { optionList } from '../lib/command-line-options.js'; // eslint-disable-line import/extensions
+import { parse } from '../lib/command-line-options.js'; // eslint-disable-line import/extensions
 import { run } from '../lib/postgrator-cli.js'; // eslint-disable-line import/extensions
 
 const __dirname = dirname(import.meta); // eslint-disable-line no-underscore-dangle
@@ -34,7 +33,7 @@ async function removeVersionTable(options) {
         database: options.database,
         username: options.username,
         password: options.password,
-        secure: options.secure,
+        ssl: options.ssl,
     };
     console.log(`\n----- ${config.driver} removing tables -----`);
     const { default: Postgrator } = await import('postgrator');
@@ -52,7 +51,7 @@ async function removeVersionTable(options) {
 }
 
 function getDefaultOptions() {
-    return commandLineArgs(optionList, { partial: true });
+    return parse({ partial: true });
 }
 
 /* Build a set of tests for a given config.
@@ -327,7 +326,7 @@ function buildTestsForOptions(options) {
         database: 'master',
         username: 'sa',
         password: 'Postgrator123!',
-        secure: false,
+        ssl: false,
     }));
 
     tests.push(async () => {
