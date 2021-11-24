@@ -5,6 +5,5 @@
     "port": 1433,
     "database": "master",
     "username": "sa",
-    "password": "Postgrator123!",
-    "ssl": false
+    "password": "Postgrator123!"
 }

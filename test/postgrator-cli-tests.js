@@ -33,7 +33,6 @@ async function removeVersionTable(options) {
         database: options.database,
         username: options.username,
         password: options.password,
-        ssl: options.ssl,
     };
     console.log(`\n----- ${config.driver} removing tables -----`);
     const { default: Postgrator } = await import('postgrator');
@@ -326,7 +325,6 @@ function buildTestsForOptions(options) {
         database: 'master',
         username: 'sa',
         password: 'Postgrator123!',
-        ssl: false,
     }));
 
     tests.push(async () => {
