@@ -27,8 +27,7 @@
     "LICENSE.md",
     "README.md",
     "index.js",
-    "postgrator-cli.js",
-    "command-line-options.js"
+    "lib"
   ],
   "keywords": [
     "cli",
