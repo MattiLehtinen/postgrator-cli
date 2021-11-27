@@ -129,17 +129,16 @@ function buildTestsForOptions(options) {
         assert.equal(migrations[0].action, 'do');
     });
 
-    tests.push(() => {
-        console.log('\n----- testing migration from 001 to 003 using config file -----');
+    tests.push(async () => {
+        console.log('\n----- testing migration from 001 to 003 using config file defined explicitly -----');
         options.to = '0003';
         options.username = '';
         options.database = '';
+        options.config = 'test/sample-config.json';
 
-        return mockCwd(path.join(__dirname, 'sample-config'), async () => {
-            const migrations = await run(options);
-            restoreOptions();
-            assert.equal(migrations[migrations.length - 1].version, 3);
-        });
+        const migrations = await run(options);
+        restoreOptions();
+        assert.equal(migrations[migrations.length - 1].version, 3);
     });
 
     tests.push(() => {
@@ -156,6 +155,20 @@ function buildTestsForOptions(options) {
         });
     });
 
+    tests.push(async () => {
+        console.log('\n----- testing non-existing config file-----');
+        options.config = 'test/config-which-does-not-exist.json';
+        options.to = '003';
+
+        try {
+            await run(options);
+        } catch (err) {
+            restoreOptions();
+            assert(err);
+            assert(err.message.indexOf('Config file not found:') >= 0);
+        }
+    });
+
     tests.push(resetMigrations);
 
     tests.push(async () => {
@@ -166,6 +179,20 @@ function buildTestsForOptions(options) {
         restoreOptions();
         assert.equal(migrations.length, MAX_REVISION);
         assert.equal(migrations[migrations.length - 1].version, MAX_REVISION);
+    });
+
+    tests.push(resetMigrations);
+
+    tests.push(async () => {
+        console.log('\n----- testing using latest revision with config file set by absolute path-----');
+        const absolutePath = path.resolve(__dirname, './sample-config.json');
+        options.config = absolutePath;
+        options.password = '';
+        options.to = '';
+
+        const migrations = await run(options);
+        assert.equal(migrations.length, MAX_REVISION);
+        restoreOptions();
     });
 
     tests.push(() => {
