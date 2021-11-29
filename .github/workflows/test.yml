@@ -38,7 +38,12 @@ jobs:
         run: sleep 10
 
       - name: Test
-        run: npm test
+        run: npm run cover
 
       - name: Stop databases
         run: docker-compose down
+
+      - name: Publish to coveralls.io
+        uses: coverallsapp/github-action@master
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -12,9 +12,8 @@
   },
   "scripts": {
     "lint": "eslint --cache .",
-    "pretest": "npm run lint",
-    "test": "npm run tests",
-    "tests": "node test/postgrator-cli-tests.js",
+    "test": "node test/postgrator-cli-tests.js",
+    "cover": "c8 npm test",
     "prepublishOnly": "crlf --set=LF *.js",
     "postpublish": "echo execute 'npm run restorecrlf' if in windows and using crlf line endings.",
     "restorecrlf": "crlf --set=CRLF *.js"
@@ -58,6 +57,7 @@
     "postgrator": "^5.0.0"
   },
   "devDependencies": {
+    "c8": "^7.10.0",
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
     "chai-subset": "^1.6.0",

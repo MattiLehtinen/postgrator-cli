@@ -1,5 +1,11 @@
 # Postgrator CLI
 
+[![Build Status][build-badge]][build]
+[![npm package][npm-badge]][npm]
+[![Coverage Status][coveralls-badge]][coveralls]
+[![Dependency Status][dependency-status-badge]][dependency-status]
+[![devDependency Status][dev-dependency-status-badge]][dev-dependency-status]
+
 Command line SQL database migration tool using SQL scripts. For PostgreSQL, MySQL and SQL Server.
 
 Version control your SQL database using plain old SQL files.
@@ -150,3 +156,18 @@ Examples
 
 ## Tests
 To run postgrator tests locally, run `docker-compose up` and then `npm test`.
+
+[build-badge]: https://img.shields.io/github/workflow/status/MattiLehtinen/postgrator-cli/test/master?style=flat-square
+[build]: https://github.com/MattiLehtinen/postgrator-cli/actions
+
+[npm-badge]: https://img.shields.io/npm/v/postgrator-cli.svg?style=flat-square
+[npm]: https://www.npmjs.org/package/postgrator-cli
+
+[coveralls-badge]: https://img.shields.io/coveralls/MattiLehtinen/postgrator-cli/master.svg?style=flat-square
+[coveralls]: https://coveralls.io/r/MattiLehtinen/postgrator-cli
+
+[dependency-status-badge]: https://david-dm.org/MattiLehtinen/postgrator-cli.svg?style=flat-square
+[dependency-status]: https://david-dm.org/MattiLehtinen/postgrator-cli
+
+[dev-dependency-status-badge]: https://david-dm.org/MattiLehtinen/postgrator-cli/dev-status.svg?style=flat-square
+[dev-dependency-status]: https://david-dm.org/MattiLehtinen/postgrator-cli#info=devDependencies
