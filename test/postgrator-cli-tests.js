@@ -1,9 +1,10 @@
-import assert from 'assert';
+import { expect, use } from 'chai';
 import path from 'path';
 import readline from 'readline';
 import eachSeries from 'p-each-series';
 import { pEvent as fromEvent } from 'p-event';
 import { dirname } from 'dirname-filename-esm';
+import { createRequire } from 'module';
 
 import { mockCwd } from 'mock-cwd';
 
@@ -12,6 +13,11 @@ import { parse } from '../lib/command-line-options.js'; // eslint-disable-line i
 import { run } from '../lib/postgrator-cli.js'; // eslint-disable-line import/extensions
 
 const __dirname = dirname(import.meta); // eslint-disable-line no-underscore-dangle
+const require = createRequire(import.meta.url);
+
+use(require('chai-subset'));
+use(require('chai-as-promised'));
+use(require('dirty-chai'));
 
 const MAX_REVISION = 5;
 const originalConsoleLog = console.log;
@@ -43,14 +49,12 @@ async function removeVersionTable(options) {
         execQuery: client.query,
     });
 
-    return pg.runQuery('DROP TABLE IF EXISTS schemaversion, animal, person').then(() => client.end()).catch((err) => {
-        assert.ifError(err);
-        return Promise.reject(err);
-    });
+    await pg.runQuery('DROP TABLE IF EXISTS schemaversion, animal, person');
+    return client.end();
 }
 
 function getDefaultOptions() {
-    return parse({ partial: true });
+    return parse();
 }
 
 /* Build a set of tests for a given config.
@@ -58,158 +62,185 @@ function getDefaultOptions() {
    postgres, mysql, sql server, etc.
 ============================================================================= */
 function buildTestsForOptions(options) {
-    const originalOptions = JSON.parse(JSON.stringify(options));
-
-    function restoreOptions() {
-        options = JSON.parse(JSON.stringify(originalOptions));
+    function getArgList(opts) {
+        return Object.entries(opts)
+            .map(([key, val]) => [`--${key}`].concat(typeof val === 'boolean' ? [] : [val]))
+            .flat();
     }
 
-    async function resetMigrations() {
+    async function resetMigrations(opts = options) {
         console.log('\n----- Reset migrations-----');
-        const originalTo = options.to;
-        options.to = 0;
-        await run(options);
-        options.to = originalTo;
+        await run(getArgList({ ...opts, to: 0 }));
     }
 
-    tests.push(() => removeVersionTable(options).catch((err) => {
-        assert.ifError(err);
-        return Promise.resolve();
-    }));
+    tests.push(() => removeVersionTable(options));
 
     tests.push(async () => {
         console.log('\n----- testing show help (output suppressed)-----');
-        options.help = true;
+        const args = getArgList({
+            ...options,
+            help: true,
+        });
 
         console.log = consoleLogCapture;
-        const migrations = await run(options);
+        await expect(run(args)).to.become(undefined);
         console.log = originalConsoleLog;
-        restoreOptions();
-        assert.strictEqual(migrations, undefined);
-        assert.ok(log.indexOf('Examples') >= 0, 'No help was displayed');
+        expect(log).to.match(/Examples/, 'No help was displayed');
     });
 
     tests.push(async () => {
         console.log('\n----- testing show version (output suppressed)-----');
-        options.version = true;
+        const args = getArgList({
+            ...options,
+            version: true,
+        });
 
         console.log = consoleLogCapture;
-        const migrations = await run(options);
+        await expect(run(args)).to.become(undefined);
         console.log = originalConsoleLog;
-        restoreOptions();
-        assert.strictEqual(migrations, undefined);
-        assert.ok(log.indexOf('Version: ') >= 0, 'No version was displayed');
+        expect(log).to.match(/Version: /, 'No version was displayed');
     });
 
     tests.push(async () => {
         console.log('\n----- testing migration to 003 -----');
-        const migrations = await run(options);
-        assert.equal(migrations.length, 3);
-        assert.equal(migrations[2].version, 3);
+        return expect(run(getArgList(options)))
+            .to.eventually.have.lengthOf(3)
+            .and.have.nested.property('2.version').equal(3);
     });
 
     tests.push(async () => {
         console.log('\n----- testing migration to 000 with conflict detection-----');
-        options.to = 0;
+        const args = getArgList({
+            ...options,
+            to: 0,
+        });
 
-        const migrations = await run(options);
-        restoreOptions();
-        assert.equal(migrations.length, 3);
-        assert.equal(migrations[2].version, 1);
-        assert.equal(migrations[2].action, 'undo');
+        await expect(run(args)).to.eventually.have.lengthOf(3).and.containSubset({
+            2: {
+                version: 1,
+                action: 'undo',
+            },
+        });
     });
 
     tests.push(async () => {
         console.log('\n----- testing migration to 001 -----');
-        options.to = 1;
-        const migrations = await run(options);
-        restoreOptions();
-        assert.equal(migrations.length, 1);
-        assert.equal(migrations[0].version, 1);
-        assert.equal(migrations[0].action, 'do');
+        const args = getArgList({
+            ...options,
+            to: 1,
+        });
+
+        await expect(run(args)).to.eventually.have.lengthOf(1).and.containSubset({
+            0: {
+                version: 1,
+                action: 'do',
+            },
+        });
     });
 
-    tests.push(() => {
-        console.log('\n----- testing migration from 001 to 003 using config file -----');
-        options.to = '0003';
-        options.username = '';
-        options.database = '';
-
-        return mockCwd(path.join(__dirname, 'sample-config'), async () => {
-            const migrations = await run(options);
-            restoreOptions();
-            assert.equal(migrations[migrations.length - 1].version, 3);
+    tests.push(async () => {
+        console.log('\n----- testing migration from 001 to 003 using config file defined explicitly -----');
+        const args = getArgList({
+            to: '0003',
+            config: 'test/sample-config.json',
         });
+
+        const migrations = await run(args);
+        expect(migrations[migrations.length - 1].version).to.equal(3);
     });
 
     tests.push(() => {
         console.log('\n----- testing migration from 003 to 002 using config file -----');
-        options.to = '02';
-        options.username = '';
-        options.database = '';
+        const args = getArgList({
+            to: '02',
+        });
 
         return mockCwd(path.join(__dirname, 'sample-config'), async () => {
-            const migrations = await run(options);
-            restoreOptions();
-            assert.equal(migrations[0].version, 3);
-            assert.equal(migrations[0].action, 'undo');
+            await expect(run(args)).to.eventually.containSubset({
+                0: {
+                    version: 3,
+                    action: 'undo',
+                },
+            });
         });
+    });
+
+    tests.push(async () => {
+        console.log('\n----- testing non-existing config file-----');
+        const args = getArgList({
+            to: '003',
+            config: 'test/config-which-does-not-exist.json',
+        });
+
+        await expect(run(args)).to.be.rejectedWith(Error, /^Config file not found:/);
     });
 
     tests.push(resetMigrations);
 
     tests.push(async () => {
         console.log('\n----- testing using latest revision without specifying to-----');
-        options.to = getDefaultOptions().to; // is 'max'
+        const args = getArgList({
+            ...options,
+            to: getDefaultOptions().to, // is 'max',
+        });
 
-        const migrations = await run(options);
-        restoreOptions();
-        assert.equal(migrations.length, MAX_REVISION);
-        assert.equal(migrations[migrations.length - 1].version, MAX_REVISION);
+        await expect(run(args)).to.eventually.have.lengthOf(MAX_REVISION).and.containSubset({
+            [MAX_REVISION - 1]: {
+                version: MAX_REVISION,
+            },
+        });
+    });
+
+    tests.push(resetMigrations);
+
+    tests.push(async () => {
+        console.log('\n----- testing using latest revision with config file set by absolute path-----');
+        const args = getArgList({
+            config: path.resolve(__dirname, './sample-config.json'),
+        });
+
+        await expect(run(args)).to.eventually.have.lengthOf(MAX_REVISION);
     });
 
     tests.push(() => {
         console.log('\n----- testing it does not re-apply same migrations -----');
-        options.password = '';
-        options.to = '';
 
         return mockCwd(path.join(__dirname, 'sample-config'), async () => {
-            const migrations = await run(options);
-            restoreOptions();
-            assert.equal(migrations.length, 0); // returns number of applied migrations
+            await expect(run()).to.eventually.have.lengthOf(0);
         });
     });
 
     tests.push(async () => {
         console.log('\n----- testing with no migration files found-----');
-        options.to = 3;
-        options['migration-pattern'] = 'test/empty-migrations/*';
+        const args = getArgList({
+            ...options,
+            to: 3,
+            'migration-pattern': 'test/empty-migrations/*',
+        });
 
         console.log = consoleLogCapture;
-        try {
-            await run(options);
-        } catch (err) {
-            console.log = originalConsoleLog;
-            restoreOptions();
-            assert(err, 'No error when there should be');
-            assert(err.message.indexOf('No migration files found') >= 0);
-            assert(log.indexOf('Examples') < 0, "Help was displayed when shouldn't");
-        }
+        await expect(run(args)).to.be.rejectedWith(Error, /^No migration files found/);
+        console.log = originalConsoleLog;
+        expect(log).not.to.match(/Examples/, "Help was displayed when shouldn't");
     });
 
     tests.push(resetMigrations);
 
     tests.push(() => {
         console.log('\n----- testing ignoring config file -----');
-        options['migration-pattern'] = '../migrations/*';
-        options['no-config'] = true;
-        options.to = 'max';
+        const args = getArgList({
+            ...options,
+            'migration-pattern': '../migrations/*',
+            'no-config': true,
+            to: 'max',
+        });
 
         return mockCwd(path.join(__dirname, 'config-with-non-existing-directory'), async () => {
-            const migrations = await run(options);
-            restoreOptions();
-            assert.equal(migrations.length, MAX_REVISION);
-            assert.equal(migrations[migrations.length - 1].version, MAX_REVISION);
+            await expect(run(args)).to.eventually.have.lengthOf(MAX_REVISION).and.containSubset({
+                [MAX_REVISION - 1]: {
+                    version: MAX_REVISION,
+                },
+            });
         });
     });
 
@@ -217,34 +248,40 @@ function buildTestsForOptions(options) {
 
     tests.push(() => {
         console.log('\n----- testing with alternative migration directory set in config file-----');
-        options.to = 'max';
-        options.username = '';
-        options.database = '';
+        const args = getArgList({
+            to: 'max',
+        });
 
         return mockCwd(path.join(__dirname, 'config-with-other-directory'), async () => {
-            const migrations = await run(options);
-            assert(migrations.length, 2);
-            await resetMigrations();
-            restoreOptions();
+            await expect(run(args)).to.eventually.have.lengthOf(2);
+            await resetMigrations({});
         });
     });
 
     tests.push(async () => {
         console.log('\n----- testing empty password-----');
-        options.password = '';
+        const args = getArgList({
+            ...options,
+            password: '',
+        });
 
-        run(options);
+        run(args);
         // this error is not thrown down the chain so it cannot be caught
-        const err = await fromEvent(process, 'unhandledRejection');
-        assert(err, 'ERR_INVALID_ARG_TYPE');
-        restoreOptions();
+        await expect(fromEvent(process, 'unhandledRejection'))
+            .to.eventually.be.an('error')
+            .and.have.property('message')
+            .match(/password authentication failed for user/);
     });
 
     tests.push(async () => {
-        console.log('\n----- testing null password asks from user-----');
+        console.log('\n----- testing null password asks from user when prompt-password is set -----');
 
         let passwordAsked = false;
-        options.password = null;
+        const { password, ...opts } = options;
+        const args = getArgList({
+            ...opts,
+            'prompt-password': true,
+        });
 
         // mock readline
         const originalCreateInterface = readline.createInterface;
@@ -256,19 +293,17 @@ function buildTestsForOptions(options) {
             };
         };
 
-        return run(options).catch((err) => {
-            restoreOptions();
-            assert(passwordAsked);
-            assert(err.length > 0);
-            readline.createInterface = originalCreateInterface;
-        });
+        await expect(run(args)).to.be.rejectedWith(Error, /password authentication failed/);
+        expect(passwordAsked).to.be.true();
+        readline.createInterface = originalCreateInterface;
     });
 
     tests.push(() => {
-        console.log('\n----- testing that config file without password asks from user -----');
-        options.to = 'max';
-        options.username = '';
-        options.database = '';
+        console.log('\n----- testing that config file without password asks from user when prompt-password is set -----');
+        const args = getArgList({
+            to: 'max',
+            'prompt-password': true,
+        });
         let passwordAsked = false;
 
         // mock readline
@@ -282,24 +317,23 @@ function buildTestsForOptions(options) {
         };
 
         return mockCwd(path.join(__dirname, 'config-without-password'), async () => {
-            const migrations = await run(options);
-            assert(migrations.length);
-            assert(passwordAsked);
-            await resetMigrations();
+            await expect(run(args)).to.eventually.have.property('length').greaterThan(0);
+            expect(passwordAsked).to.be.true();
+            await resetMigrations({ 'prompt-password': true });
             readline.createInterface = originalCreateInterface;
-            restoreOptions();
         });
     });
 
     tests.push(() => {
         console.log('\n----- testing detecting migration files with same number-----');
-        options.to = 3;
-        options['migration-pattern'] = 'test/conflicting-migrations/*';
-
-        return run(options).catch((err) => {
-            restoreOptions();
-            assert(err.message.indexOf('Two migrations found with version 2 and action do') >= 0, 'No migration conflicts were detected');
+        const args = getArgList({
+            ...options,
+            to: 3,
+            'migration-pattern': 'test/conflicting-migrations/*',
         });
+
+        return expect(run(args))
+            .to.be.rejectedWith(Error, /^Two migrations found with version 2 and action do/, 'No migration conflicts were detected');
     });
 
     tests.push(() => removeVersionTable({
@@ -311,11 +345,10 @@ function buildTestsForOptions(options) {
     tests.push(async () => {
         console.log('\n----- testing migration to 003 using mysql -----');
 
-        return mockCwd(path.join(__dirname, 'mysql-config'), async () => {
-            const migrations = await run(options);
-            assert.equal(migrations.length, 3);
-            assert.equal(migrations[2].version, 3);
-        });
+        return mockCwd(
+            path.join(__dirname, 'mysql-config'),
+            async () => expect(run([3])).to.eventually.have.lengthOf(3).and.have.nested.property('2.version').equal(3),
+        );
     });
 
     tests.push(() => removeVersionTable({
@@ -330,11 +363,10 @@ function buildTestsForOptions(options) {
     tests.push(async () => {
         console.log('\n----- testing migration to 003 using mssql -----');
 
-        return mockCwd(path.join(__dirname, 'mssql-config'), async () => {
-            const migrations = await run(options);
-            assert.equal(migrations.length, 3);
-            assert.equal(migrations[2].version, 3);
-        });
+        return mockCwd(
+            path.join(__dirname, 'mssql-config'),
+            async () => expect(run([3])).to.eventually.have.lengthOf(3).and.have.nested.property('2.version').equal(3),
+        );
     });
 }
 
@@ -366,5 +398,4 @@ eachSeries(tests, (testFunc) => {
 }).catch((err) => {
     console.log = originalConsoleLog;
     console.log(err);
-    assert.ifError(err);
 });
