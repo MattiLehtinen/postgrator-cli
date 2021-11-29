@@ -64,7 +64,7 @@ function getDefaultOptions() {
 function buildTestsForOptions(options) {
     function getArgList(opts) {
         return Object.entries(opts)
-            .map(([key, val]) => [`--${key}`].concat(typeof val === 'boolean' ? [] : [val]))
+            .map(([key, val]) => [`--${key}`].concat(typeof val === 'boolean' || val === null ? [] : [val]))
             .flat();
     }
 
@@ -274,13 +274,12 @@ function buildTestsForOptions(options) {
     });
 
     tests.push(async () => {
-        console.log('\n----- testing null password asks from user when prompt-password is set -----');
+        console.log('\n----- testing null password asks from user when password option is empty -----');
 
         let passwordAsked = false;
-        const { password, ...opts } = options;
         const args = getArgList({
-            ...opts,
-            'prompt-password': true,
+            ...options,
+            password: null,
         });
 
         // mock readline
@@ -299,10 +298,10 @@ function buildTestsForOptions(options) {
     });
 
     tests.push(() => {
-        console.log('\n----- testing that config file without password asks from user when prompt-password is set -----');
+        console.log('\n----- testing that config file without password asks from user when password option is empty -----');
         const args = getArgList({
             to: 'max',
-            'prompt-password': true,
+            password: null,
         });
         let passwordAsked = false;
 
@@ -319,7 +318,7 @@ function buildTestsForOptions(options) {
         return mockCwd(path.join(__dirname, 'config-without-password'), async () => {
             await expect(run(args)).to.eventually.have.property('length').greaterThan(0);
             expect(passwordAsked).to.be.true();
-            await resetMigrations({ 'prompt-password': true });
+            await resetMigrations({ password: null });
             readline.createInterface = originalCreateInterface;
         });
     });
