@@ -92,7 +92,7 @@ You can specify all the parameters from command line (see below) but the easiest
 
 ```
 {
-    "migrationDirectory": "migrations",
+    "migrationPattern": "migrations/*",
     "driver": "pg",
     "host": "127.0.0.1",
     "port": 5432,
@@ -123,16 +123,17 @@ postgrator [[--to=]<version>] --database=<db> [--driver=<driver>] [--host=<host>
 
 ```
   --to version                          Version number of the file to migrate to or 'max'. Default: 'max'
-  -r, --driver pg|mysql|mssql           Database driver. Default: 'pg'
-  -h, --host hostname                   Host. Default: '127.0.0.1'
-  -o, --port port                       Host. Default: '5432'
-  -d, --database database               Database name
-  -u, --username database               Username
-  -p, --password password               Password
-  -m, --migration-directory directory   A directory to run migration files from. Default: 'migrations''
+  -r, --driver pg|mysql|mssql           Database driver. Default: 'pg'.
+  -h, --host hostname                   Host.
+  -o, --port port                       Port.
+  -d, --database database               Database name.
+  -u, --username database               Username.
+  -p, --password password               Password. If parameter without value is given, password will be asked.
+  -m, --migration-pattern pattern       A pattern matching files to run migration files from. Default: 'migrations/*'
   -t --schema-table                     Table created to track schema version.
-  -c --validate-checksum                Validates checksum of existing SQL migration files already run prior to executing migrations.
+  --validate-checksum                   Validates checksum of existing SQL migration files already run prior to executing migrations.
   -s, --ssl                             Enables ssl connections. When using the mysql driver it expects a string containing name of ssl profile.
+  -c, --config                          Explicitly set the location of the config file to load.
   --no-config                           Do not load options from a configuration file.
   -v, --version                         Print version.
   -?, --help                            Print this usage guide.
@@ -148,7 +149,4 @@ Examples
 ```
 
 ## Tests
-To run postgrator tests locally, you'll need:
-- A [postgreSQL](http://www.postgresql.org/download/) instance running on default port (5432), with a `postgrator` (password `postgrator`) account and a `postgrator` database
-
-then run `npm test`
+To run postgrator tests locally, run `docker-compose up` and then `npm test`.
