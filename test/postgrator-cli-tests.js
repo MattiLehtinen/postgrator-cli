@@ -62,8 +62,6 @@ function getDefaultOptions() {
    postgres, mysql, sql server, etc.
 ============================================================================= */
 function buildTestsForOptions(options) {
-    const restoreOptions = () => {};
-
     function getArgList(opts) {
         return Object.entries(opts)
             .map(([key, val]) => [`--${key}`].concat(typeof val === 'boolean' ? [] : [val]))
@@ -164,7 +162,6 @@ function buildTestsForOptions(options) {
                     action: 'undo',
                 },
             });
-            restoreOptions();
         });
     });
 
@@ -210,7 +207,6 @@ function buildTestsForOptions(options) {
 
         return mockCwd(path.join(__dirname, 'sample-config'), async () => {
             await expect(run()).to.eventually.have.lengthOf(0);
-            restoreOptions();
         });
     });
 
@@ -328,7 +324,7 @@ function buildTestsForOptions(options) {
         });
     });
 
-    tests.push(async () => {
+    tests.push(() => {
         console.log('\n----- testing detecting migration files with same number-----');
         const args = getArgList({
             ...options,
@@ -336,9 +332,8 @@ function buildTestsForOptions(options) {
             'migration-pattern': 'test/conflicting-migrations/*',
         });
 
-        await expect(run(args))
+        return expect(run(args))
             .to.be.rejectedWith(Error, /^Two migrations found with version 2 and action do/, 'No migration conflicts were detected');
-        restoreOptions();
     });
 
     tests.push(() => removeVersionTable({
