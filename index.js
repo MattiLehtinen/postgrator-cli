@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 
+import { argv } from 'process';
 import { run } from './lib/postgrator-cli.js'; // eslint-disable-line import/extensions
-import { parse } from './lib/command-line-options.js'; // eslint-disable-line import/extensions
 
-const options = parse();
-run(options).catch((err) => {
+run(argv).catch((err) => {
     console.log(`Error: ${err.message}`);
     process.exit(1);
 });
