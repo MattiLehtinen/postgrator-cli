@@ -123,6 +123,8 @@ $ postgrator 4
 
 ```
 postgrator [[--to=]<version>] --database=<db> [--driver=<driver>] [--host=<host>] [--port=<port>] [--username=<username>] [--password=<password>] [--no-config]
+
+postgrator [[--to=]<version>] [--config=<config>]
 ```
 
 ### Options
@@ -139,7 +141,7 @@ postgrator [[--to=]<version>] --database=<db> [--driver=<driver>] [--host=<host>
   -t --schema-table                     Table created to track schema version.
   --validate-checksum                   Validates checksum of existing SQL migration files already run prior to executing migrations.
   -s, --ssl                             Enables ssl connections. When using the mysql driver it expects a string containing name of ssl profile.
-  -c, --config                          Explicitly set the location of the config file to load.
+  -c, --config file                     Explicitly set the location of the config file to load.
   --no-config                           Do not load options from a configuration file.
   -v, --version                         Print version.
   -?, --help                            Print this usage guide.
