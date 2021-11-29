@@ -68,9 +68,9 @@ function buildTestsForOptions(options) {
             .flat();
     }
 
-    async function resetMigrations(opts = options) {
+    function resetMigrations(opts = options) {
         console.log('\n----- Reset migrations-----');
-        await run(getArgList({ ...opts, to: 0 }));
+        return run(getArgList({ ...opts, to: 0 }));
     }
 
     tests.push(() => removeVersionTable(options));
@@ -177,6 +177,19 @@ function buildTestsForOptions(options) {
 
     tests.push(resetMigrations);
 
+    tests.push(() => {
+        console.log('\n----- testing merging cli and config options -----');
+        const args = getArgList({
+            to: '003',
+            password: options.password,
+            config: 'test/config-without-password.json',
+        });
+
+        return expect(run(args)).to.eventually.have.lengthOf(3);
+    });
+
+    tests.push(resetMigrations);
+
     tests.push(async () => {
         console.log('\n----- testing using latest revision without specifying to-----');
         const args = getArgList({
@@ -193,13 +206,13 @@ function buildTestsForOptions(options) {
 
     tests.push(resetMigrations);
 
-    tests.push(async () => {
+    tests.push(() => {
         console.log('\n----- testing using latest revision with config file set by absolute path-----');
         const args = getArgList({
             config: path.resolve(__dirname, './sample-config.json'),
         });
 
-        await expect(run(args)).to.eventually.have.lengthOf(MAX_REVISION);
+        return expect(run(args)).to.eventually.have.lengthOf(MAX_REVISION);
     });
 
     tests.push(() => {
@@ -208,6 +221,36 @@ function buildTestsForOptions(options) {
         return mockCwd(path.join(__dirname, 'sample-config'), async () => {
             await expect(run()).to.eventually.have.lengthOf(0);
         });
+    });
+
+    tests.push(resetMigrations);
+
+    tests.push(() => {
+        console.log('\n----- testing preferring cli arguments over config options-----');
+        const args = getArgList({
+            username: 'invaliduser',
+            config: path.resolve(__dirname, './sample-config.json'),
+        });
+
+        return expect(run(args)).to.be.rejectedWith(Error, /^password authentication failed for user "invaliduser"/);
+    });
+
+    tests.push(resetMigrations);
+
+    tests.push(async () => {
+        console.log('\n----- testing using environment variables to run migrations -----');
+        process.env.PGHOST = options.host;
+        process.env.PGPORT = options.port;
+        process.env.PGUSER = options.username;
+        process.env.PGPASSWORD = options.password;
+        process.env.PGDATABASE = options.database;
+
+        await expect(run(['--migration-pattern', options['migration-pattern']])).to.eventually.have.lengthOf(MAX_REVISION);
+        process.env.PGHOST = undefined;
+        process.env.PGPORT = undefined;
+        process.env.PGUSER = undefined;
+        process.env.PGPASSWORD = undefined;
+        process.env.PGDATABASE = undefined;
     });
 
     tests.push(async () => {
@@ -297,10 +340,11 @@ function buildTestsForOptions(options) {
         readline.createInterface = originalCreateInterface;
     });
 
-    tests.push(() => {
+    tests.push(async () => {
         console.log('\n----- testing that config file without password asks from user when password option is empty -----');
         const args = getArgList({
             to: 'max',
+            config: 'test/config-without-password.json',
             password: null,
         });
         let passwordAsked = false;
@@ -315,12 +359,10 @@ function buildTestsForOptions(options) {
             };
         };
 
-        return mockCwd(path.join(__dirname, 'config-without-password'), async () => {
-            await expect(run(args)).to.eventually.have.property('length').greaterThan(0);
-            expect(passwordAsked).to.be.true();
-            await resetMigrations({ password: null });
-            readline.createInterface = originalCreateInterface;
-        });
+        await expect(run(args)).to.eventually.have.property('length').greaterThan(0);
+        expect(passwordAsked).to.be.true();
+        await resetMigrations({ config: 'test/config-without-password.json', password: null });
+        readline.createInterface = originalCreateInterface;
     });
 
     tests.push(() => {
@@ -343,11 +385,9 @@ function buildTestsForOptions(options) {
 
     tests.push(async () => {
         console.log('\n----- testing migration to 003 using mysql -----');
+        const args = ['3', '--config', 'test/mysql-config.json'];
 
-        return mockCwd(
-            path.join(__dirname, 'mysql-config'),
-            async () => expect(run([3])).to.eventually.have.lengthOf(3).and.have.nested.property('2.version').equal(3),
-        );
+        return expect(run(args)).to.eventually.have.lengthOf(3).and.have.nested.property('2.version').equal(3);
     });
 
     tests.push(() => removeVersionTable({
@@ -361,11 +401,9 @@ function buildTestsForOptions(options) {
 
     tests.push(async () => {
         console.log('\n----- testing migration to 003 using mssql -----');
+        const args = ['3', '--config', 'test/mssql-config.json'];
 
-        return mockCwd(
-            path.join(__dirname, 'mssql-config'),
-            async () => expect(run([3])).to.eventually.have.lengthOf(3).and.have.nested.property('2.version').equal(3),
-        );
+        return expect(run(args)).to.eventually.have.lengthOf(3).and.have.nested.property('2.version').equal(3);
     });
 }
 
