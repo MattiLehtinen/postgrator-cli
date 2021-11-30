@@ -377,6 +377,15 @@ function buildTestsForOptions(options) {
             .to.be.rejectedWith(Error, /^Two migrations found with version 2 and action do/, 'No migration conflicts were detected');
     });
 
+    tests.push(async () => {
+        console.log('\n----- testing using migration number at the end -----');
+
+        const migrations = await run(['--config', 'test/sample-config.json', '0003']);
+        expect(migrations[migrations.length - 1].version).to.equal(3);
+    });
+
+    tests.push(resetMigrations);
+
     tests.push(() => removeVersionTable({
         ...options,
         driver: 'mysql',
@@ -404,6 +413,37 @@ function buildTestsForOptions(options) {
         const args = ['3', '--config', 'test/mssql-config.json'];
 
         return expect(run(args)).to.eventually.have.lengthOf(3).and.have.nested.property('2.version').equal(3);
+    });
+
+    tests.push(async () => {
+        console.log('\n----- testing dropping schema table-----');
+        const args = getArgList({
+            config: 'test/sample-config.json',
+            to: 0,
+        });
+
+        await expect(run(args)).to.eventually.have.lengthOf(0);
+        return expect(run(['drop-schema', '--config', 'test/sample-config.json']))
+            .to.become(undefined);
+    });
+
+    tests.push(async () => {
+        console.log('\n----- testing dropping schema when the table name is specified explicitly -----');
+        const args = getArgList({
+            'schema-table': 'my-schema-table',
+            config: 'test/sample-config.json',
+            to: 0,
+        });
+
+        await expect(run(args)).to.eventually.have.lengthOf(0);
+        return expect(run(['drop-schema', '--config', 'test/sample-config.json', '--schema-table', 'my-schema-table']))
+            .to.become(undefined);
+    });
+
+    tests.push(() => {
+        console.log('\n----- testing dropping schema table that does not exist -----');
+        return expect(run(['drop-schema', '--config', 'test/sample-config.json']))
+            .to.be.rejectedWith(Error, 'table "schemaversion" does not exist');
     });
 }
 
