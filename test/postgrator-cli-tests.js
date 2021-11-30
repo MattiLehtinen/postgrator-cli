@@ -9,7 +9,7 @@ import { createRequire } from 'module';
 import { mockCwd } from 'mock-cwd';
 
 import getClient from '../lib/clients/index.js'; // eslint-disable-line import/extensions
-import { parse } from '../lib/command-line-options.js'; // eslint-disable-line import/extensions
+import parse from '../lib/command-line-options.js'; // eslint-disable-line import/extensions
 import { run } from '../lib/postgrator-cli.js'; // eslint-disable-line import/extensions
 
 const __dirname = dirname(import.meta); // eslint-disable-line no-underscore-dangle
