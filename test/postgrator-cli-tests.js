@@ -428,6 +428,15 @@ function buildTestsForOptions(options) {
     });
 
     tests.push(async () => {
+        console.log('\n----- testing dropping schema table with default configuration file -----');
+
+        return mockCwd(path.join(__dirname, 'sample-config'), async () => {
+            await expect(run(['0'])).to.eventually.have.lengthOf(0);
+            await expect(run(['drop-schema'])).to.become(undefined);
+        });
+    });
+
+    tests.push(async () => {
         console.log('\n----- testing dropping schema when the table name is specified explicitly -----');
         const args = getArgList({
             'schema-table': 'my-schema-table',
