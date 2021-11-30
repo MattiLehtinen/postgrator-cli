@@ -125,6 +125,10 @@ $ postgrator 4
 postgrator [[--to=]<version>] --database=<db> [--driver=<driver>] [--host=<host>] [--port=<port>] [--username=<username>] [--password=<password>] [--no-config]
 
 postgrator [[--to=]<version>] [--config=<config>]
+
+postgrator migrate [[--to=]version]
+
+postgrator drop-schema [--config=<config>]
 ```
 
 ### Options
@@ -154,6 +158,7 @@ Examples
   3. Use default configuration file to migrate to version 5   postgrator 5
   4. Migrate to latest version using default configuration    postgrator
   file (.postgratorrc.json, etc)
+  5. Drop the schema table using configuration files          postgrator drop-schema
 ```
 
 ## Tests
