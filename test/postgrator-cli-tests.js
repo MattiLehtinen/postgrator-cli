@@ -101,6 +101,13 @@ function buildTestsForOptions(options) {
         expect(log).to.match(/Version: /, 'No version was displayed');
     });
 
+    tests.push(() => {
+        console.log('\n----- testing an invalid command-----');
+
+        return expect(run(['invalid-command', '--config', 'test/sample-config.json']))
+            .to.be.rejectedWith(Error, 'Invalid command.');
+    });
+
     tests.push(async () => {
         console.log('\n----- testing migration to 003 -----');
         return expect(run(getArgList(options)))
