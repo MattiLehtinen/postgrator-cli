@@ -57,7 +57,7 @@
     "postgrator": "^5.0.0"
   },
   "devDependencies": {
-    "c8": "^7.10.0",
+    "c8": "^7.11.0",
     "chai": "^4.3.4",
     "chai-as-promised": "^7.1.1",
     "chai-subset": "^1.6.0",
