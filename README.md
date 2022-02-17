@@ -1,5 +1,11 @@
 # Postgrator CLI
 
+[![Build Status][build-badge]][build]
+[![npm package][npm-badge]][npm]
+[![Coverage Status][coveralls-badge]][coveralls]
+[![Dependency Status][dependency-status-badge]][dependency-status]
+[![devDependency Status][dev-dependency-status-badge]][dev-dependency-status]
+
 Command line SQL database migration tool using SQL scripts. For PostgreSQL, MySQL and SQL Server.
 
 Version control your SQL database using plain old SQL files.
@@ -10,7 +16,7 @@ Uses [Postgrator](https://github.com/rickbergfalk/postgrator) node.js library de
 
 ## Installation
 
-*As of postgrator-cli 4 Node.js version 10 or greater is required*
+*As of postgrator-cli 5 Node.js version 12 or greater is required*
 
 ```
 npm install -g postgrator-cli
@@ -27,7 +33,6 @@ And install the appropriate DB engine(s) if not installed yet:
 ```
 npm install pg@8
 npm install mysql@2
-npm install mysql2@2
 npm install mssql@6
 ```
 
@@ -89,11 +94,11 @@ environment variables such as the above.
 
 You can specify all the parameters from command line (see below) but the easiest way is to:
 
-* Create `postgrator.json` configuration file. For example:
+* Create `.postgratorrc.json`, or any config file supported by [cosmiconfig](https://github.com/davidtheclark/cosmiconfig). For example:
 
 ```
 {
-    "migrationDirectory": "migrations",
+    "migrationPattern": "migrations/*",
     "driver": "pg",
     "host": "127.0.0.1",
     "port": 5432,
@@ -103,7 +108,7 @@ You can specify all the parameters from command line (see below) but the easiest
 }
 ```
 
-* Migrate to latest version (it looks settings by default from `postgrator.json`):
+* Migrate to latest version (it looks settings by default from `.postgratorrc.json`, etc):
 ```
 $ postgrator
 ```
@@ -117,25 +122,31 @@ $ postgrator 4
 ### Synopsis
 
 ```
-postgrator [[--to=]<version>] --database=<db> [--driver=<driver>] [--host=<host>] [--port=<port>] [--username=<username>] [--password=<password>]
+postgrator [[--to=]<version>] --database=<db> [--driver=<driver>] [--host=<host>] [--port=<port>] [--username=<username>] [--password=<password>] [--no-config]
+
 postgrator [[--to=]<version>] [--config=<config>]
+
+postgrator migrate [[--to=]version]
+
+postgrator drop-schema [--config=<config>]
 ```
 
 ### Options
 
 ```
   --to version                          Version number of the file to migrate to or 'max'. Default: 'max'
-  -r, --driver pg|mysql|mssql           Database driver. Default: 'pg'
-  -h, --host hostname                   Host. Default: '127.0.0.1'
-  -o, --port port                       Host. Default: '5432'
-  -d, --database database               Database name
-  -u, --username database               Username
-  -p, --password password               Password
-  -m, --migration-directory directory   A directory to run migration files from. Default: 'migrations''
-  -s, --secure                          Secure connection (Azure). Default: false
-  -c, --config file                     Load configuration from a JSON file. With a configuration file you can also
-                                        use additional configuration parameters available on postgrator. See syntax
-                                        from https://github.com/rickbergfalk/postgrator
+  -r, --driver pg|mysql|mssql           Database driver. Default: 'pg'.
+  -h, --host hostname                   Host.
+  -o, --port port                       Port.
+  -d, --database database               Database name.
+  -u, --username database               Username.
+  -p, --password password               Password. If parameter without value is given, password will be asked.
+  -m, --migration-pattern pattern       A pattern matching files to run migration files from. Default: 'migrations/*'
+  -t --schema-table                     Table created to track schema version.
+  --validate-checksum                   Validates checksum of existing SQL migration files already run prior to executing migrations.
+  -s, --ssl                             Enables ssl connections. When using the mysql driver it expects a string containing name of ssl profile.
+  -c, --config file                     Explicitly set the location of the config file to load.
+  --no-config                           Do not load options from a configuration file.
   -v, --version                         Print version.
   -?, --help                            Print this usage guide.
 
@@ -143,14 +154,27 @@ Examples
 
   1. Specify parameters on command line                       postgrator 23 --host 127.0.0.1 --database sampledb
                                                               --username testuser --password testpassword
-  2. Use configuration file                                   postgrator 2 --config myConfig.json
-  3. Use default configuration file (postgrator.json)         postgrator 5
+  2. Explicitly disable loading configuration file            postgrator 2 --no-config
+  3. Use default configuration file to migrate to version 5   postgrator 5
   4. Migrate to latest version using default configuration    postgrator
-  file (postgrator.json)
+  file (.postgratorrc.json, etc)
+  5. Drop the schema table using configuration files          postgrator drop-schema
 ```
 
 ## Tests
-To run postgrator tests locally, you'll need:
-- A [postgreSQL](http://www.postgresql.org/download/) instance running on default port (5432), with a `postgrator` (password `postgrator`) account and a `postgrator` database
+To run postgrator tests locally, run `docker-compose up` and then `npm test`.
 
-then run `npm test`
+[build-badge]: https://img.shields.io/github/workflow/status/MattiLehtinen/postgrator-cli/test/master?style=flat-square
+[build]: https://github.com/MattiLehtinen/postgrator-cli/actions
+
+[npm-badge]: https://img.shields.io/npm/v/postgrator-cli.svg?style=flat-square
+[npm]: https://www.npmjs.org/package/postgrator-cli
+
+[coveralls-badge]: https://img.shields.io/coveralls/MattiLehtinen/postgrator-cli/master.svg?style=flat-square
+[coveralls]: https://coveralls.io/r/MattiLehtinen/postgrator-cli
+
+[dependency-status-badge]: https://david-dm.org/MattiLehtinen/postgrator-cli.svg?style=flat-square
+[dependency-status]: https://david-dm.org/MattiLehtinen/postgrator-cli
+
+[dev-dependency-status-badge]: https://david-dm.org/MattiLehtinen/postgrator-cli/dev-status.svg?style=flat-square
+[dev-dependency-status]: https://david-dm.org/MattiLehtinen/postgrator-cli#info=devDependencies

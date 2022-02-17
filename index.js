@@ -1,15 +1,9 @@
 #!/usr/bin/env node
 
-const commandLineArgs = require('command-line-args');
-const postgratorCli = require('./postgrator-cli');
-const commandLineOptions = require('./command-line-options');
+import { argv } from 'process';
+import { run } from './lib/postgrator-cli.js'; // eslint-disable-line import/extensions
 
-const optionList = commandLineOptions.optionList; // eslint-disable-line prefer-destructuring
-
-const options = commandLineArgs(optionList);
-postgratorCli.run(options, (err) => {
-    if (err) {
-        console.log(`Error: ${err.message}`);
-        process.exit(1);
-    }
+run(argv).catch((err) => {
+    console.log(`Error: ${err.message}`);
+    process.exit(1);
 });

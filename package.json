@@ -3,17 +3,17 @@
   "version": "4.0.0",
   "description": "Command line interface for Postgrator",
   "author": "Matti Lehtinen <matlehti@gmail.com> (https://twitter.com/MattiLehtinen)",
+  "type": "module",
   "bin": {
     "postgrator": "./index.js"
   },
   "engines": {
-    "node": ">=10.0.0"
+    "node": ">=12.22.0"
   },
   "scripts": {
-    "lint": "eslint .",
-    "pretest": "npm run lint",
-    "test": "npm run tests",
-    "tests": "node test/postgrator-cli-tests.js",
+    "lint": "eslint --cache .",
+    "test": "node test/postgrator-cli-tests.js",
+    "cover": "c8 npm test",
     "prepublishOnly": "crlf --set=LF *.js",
     "postpublish": "echo execute 'npm run restorecrlf' if in windows and using crlf line endings.",
     "restorecrlf": "crlf --set=CRLF *.js"
@@ -26,8 +26,7 @@
     "LICENSE.md",
     "README.md",
     "index.js",
-    "postgrator-cli.js",
-    "command-line-options.js"
+    "lib"
   ],
   "keywords": [
     "cli",
@@ -51,16 +50,44 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "command-line-args": "^5.1.1",
-    "command-line-usage": "^6.1.0",
-    "postgrator": "^4.0.0"
+    "command-line-args": "^5.2.0",
+    "command-line-usage": "^6.1.1",
+    "cosmiconfig": "^7.0.1",
+    "p-tap": "^4.0.0",
+    "postgrator": "^5.0.0"
   },
   "devDependencies": {
-    "async": "3.2.0",
+    "c8": "^7.10.0",
+    "chai": "^4.3.4",
+    "chai-as-promised": "^7.1.1",
+    "chai-subset": "^1.6.0",
     "crlf": "^1.1.1",
-    "eslint": "^7.0.0",
-    "eslint-config-airbnb-base": "^14.0.0",
-    "eslint-plugin-import": "^2.18.2",
-    "pg": "^8.2.1"
+    "dirname-filename-esm": "^1.1.1",
+    "dirty-chai": "^2.0.1",
+    "eslint": "^8.3.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.3",
+    "mock-cwd": "^1.0.0",
+    "mssql": "^7.3.0",
+    "mysql": "^2.18.1",
+    "p-each-series": "^3.0.0",
+    "p-event": "^5.0.1",
+    "pg": "^8.7.1"
+  },
+  "peerDependencies": {
+    "mssql": "^7.3.0",
+    "mysql": "^2.18.1",
+    "pg": "^8.7.1"
+  },
+  "peerDependenciesMeta": {
+    "mssql": {
+      "optional": true
+    },
+    "mysql": {
+      "optional": true
+    },
+    "pg": {
+      "optional": true
+    }
   }
 }
