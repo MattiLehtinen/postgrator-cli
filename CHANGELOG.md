@@ -3,11 +3,11 @@
 ## 5.0.0
 ### Unreleased
 * (**Breaking**) Node.js 12 or later required
-* (**Breaking**) Removed option -t, --detect-version-conflicts. Conflicts are now always detected.
 * (**Breaking**) Target postgrator 5.x.x
 * (**Breaking**) Migrate to using cosmiconfig for configuration file
 * (**Breaking**) `secure` option is now `ssl` and it works differently for each supported driver
 * Add support for node 16.x.x
+* Add drop-schema command
 * Support merging cli and config file options
 
 ## 4.0.0
