@@ -6,8 +6,10 @@
 * (**Breaking**) Target postgrator 5.x.x
 * (**Breaking**) Migrate to using cosmiconfig for configuration file
 * (**Breaking**) `secure` option is now `ssl` and it works differently for each supported driver
+* (**Breaking**) Replace `--migration-directory` option with `--migration-pattern` option
 * Add support for node 16.x.x
 * Add drop-schema command
+* Add --schema-table option
 * Support merging cli and config file options
 
 ## 4.0.0
