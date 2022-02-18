@@ -15,6 +15,9 @@ jobs:
           - 12.x
           - 14.x
           - 16.x
+        mssql-version:
+          - ^7.0.0
+          - ^8.0.0
         redis-version: [6]
 
     steps:
@@ -27,6 +30,9 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+
+      - name: Install mssql
+        run: npm install --no-save mssql@${{ matrix.mssql-version }}
 
       - name: Lint
         run: npm run lint
