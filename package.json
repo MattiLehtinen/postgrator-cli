@@ -76,8 +76,8 @@
   },
   "peerDependencies": {
     "mssql": "^7.0.0 || ^8.0.0",
-    "mysql": "^2.18.1",
-    "pg": "^8.7.3"
+    "mysql": "^2.0.0",
+    "pg": "^8.0.0"
   },
   "peerDependenciesMeta": {
     "mssql": {
