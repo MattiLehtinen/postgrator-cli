@@ -1,7 +1,7 @@
 # Changelog
 
 ## 5.0.0
-### Unreleased
+### Feb, 19, 2022
 * (**Breaking**) Node.js 12 or later required
 * (**Breaking**) Target postgrator 5.x.x
 * (**Breaking**) Migrate to using cosmiconfig for configuration file
