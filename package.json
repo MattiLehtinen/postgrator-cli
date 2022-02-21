@@ -54,7 +54,7 @@
     "command-line-usage": "^6.1.1",
     "cosmiconfig": "^7.0.1",
     "p-tap": "^4.0.0",
-    "postgrator": "^5.0.0"
+    "postgrator": "^5.0.1"
   },
   "devDependencies": {
     "c8": "^7.11.0",
