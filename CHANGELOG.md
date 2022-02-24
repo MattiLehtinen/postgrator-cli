@@ -1,5 +1,10 @@
 # Changelog
 
+## 5.1.0
+### Feb, 24, 2022
+* Upgrade `postgrator@7.0.0`
+* Support `*.cjs` and `*.mjs` files
+
 ## 5.0.0
 ### Feb, 19, 2022
 * (**Breaking**) Node.js 12 or later required
