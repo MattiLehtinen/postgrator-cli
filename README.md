@@ -108,6 +108,8 @@ You can specify all the parameters from command line (see below) but the easiest
 }
 ```
 
+You can also set these settings with all ENV vars that [node-postgres](https://node-postgres.com/features/connecting#environment-variables) supports, though this may vary with your driver. (e.g. `PGHOST` `PGHOST` etc)
+
 * Migrate to latest version (it looks settings by default from `.postgratorrc.json`, etc):
 ```
 $ postgrator
