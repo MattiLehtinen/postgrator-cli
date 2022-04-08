@@ -1,0 +1,9 @@
+export default {
+    migrationPattern: '../migrations/*',
+    driver: 'pg',
+    host: '127.0.0.1',
+    port: 5432,
+    database: 'postgrator',
+    username: 'postgrator',
+    password: 'postgrator'
+}
