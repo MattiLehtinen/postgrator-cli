@@ -1,17 +1,17 @@
 # Changelog
 
 ## 5.2.0
-### Unreleased
+### April, 9, 2022
 * Add support for `.postgratorrc.mjs` and `.postgratorrc.js` config files with `type: module`.
 * Add `sqlite3` support
 
 ## 5.1.0
-### Feb, 24, 2022
+### February, 24, 2022
 * Upgrade `postgrator@7.0.0`
 * Support `*.cjs` and `*.mjs` files
 
 ## 5.0.0
-### Feb, 19, 2022
+### February, 19, 2022
 * (**Breaking**) Node.js 12 or later required
 * (**Breaking**) Target postgrator 5.x.x
 * (**Breaking**) Migrate to using cosmiconfig for configuration file
