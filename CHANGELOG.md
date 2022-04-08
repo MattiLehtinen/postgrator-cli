@@ -1,5 +1,9 @@
 # Changelog
 
+## 5.2.0
+### Unreleased
+* Add support for `.postgratorrc.mjs` and `.postgratorrc.js` config files with `type: module`.
+
 ## 5.1.0
 ### Feb, 24, 2022
 * Upgrade `postgrator@7.0.0`

@@ -94,7 +94,7 @@ environment variables such as the above.
 
 You can specify all the parameters from command line (see below) but the easiest way is to:
 
-* Create `.postgratorrc.json`, or any config file supported by [cosmiconfig](https://github.com/davidtheclark/cosmiconfig). For example:
+* Create `.postgratorrc.json`, or any config file supported by [lilconfig](https://github.com/antonk52/lilconfig). We also support `.yml` and `.yaml` files, and `esm` config files. For example:
 
 ```
 {
