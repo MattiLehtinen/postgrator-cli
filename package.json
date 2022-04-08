@@ -54,7 +54,7 @@
     "command-line-usage": "^6.1.2",
     "lilconfig": "^2.0.5",
     "p-tap": "^4.0.0",
-    "postgrator": "^7.0.0",
+    "postgrator": "^7.1.0",
     "yaml": "^2.0.0"
   },
   "devDependencies": {
