@@ -172,6 +172,38 @@ function buildTestsForOptions(options) {
         });
     });
 
+    tests.push(() => {
+        console.log('\n----- testing migration from 002 to 003 using esm config file -----');
+        const args = getArgList({
+            to: '03',
+        });
+
+        return mockCwd(path.join(__dirname, 'sample-config-esm'), async () => {
+            await expect(run(args)).to.eventually.containSubset({
+                0: {
+                    version: 3,
+                    action: 'do',
+                },
+            });
+        });
+    });
+
+    tests.push(() => {
+        console.log('\n----- testing migration from 003 to 002 using cjs config file -----');
+        const args = getArgList({
+            to: '02',
+        });
+
+        return mockCwd(path.join(__dirname, 'sample-config-cjs'), async () => {
+            await expect(run(args)).to.eventually.containSubset({
+                0: {
+                    version: 3,
+                    action: 'undo',
+                },
+            });
+        });
+    });
+
     tests.push(async () => {
         console.log('\n----- testing non-existing config file-----');
         const args = getArgList({
