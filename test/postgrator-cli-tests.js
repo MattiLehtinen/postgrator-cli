@@ -49,7 +49,15 @@ async function removeVersionTable(options) {
         execQuery: client.query,
     });
 
-    await pg.runQuery('DROP TABLE IF EXISTS schemaversion, animal, person');
+    if (options.driver === 'sqlite3') {
+        await Promise.all([
+            pg.runQuery('DROP TABLE IF EXISTS schemaversion'),
+            pg.runQuery('DROP TABLE IF EXISTS animal'),
+            pg.runQuery('DROP TABLE IF EXISTS person'),
+        ]);
+    } else {
+        await pg.runQuery('DROP TABLE IF EXISTS schemaversion, animal, person');
+    }
     return client.end();
 }
 
@@ -450,6 +458,18 @@ function buildTestsForOptions(options) {
     tests.push(async () => {
         console.log('\n----- testing migration to 003 using mssql -----');
         const args = ['3', '--config', 'test/mssql-config.json'];
+
+        return expect(run(args)).to.eventually.have.lengthOf(3).and.have.nested.property('2.version').equal(3);
+    });
+
+    tests.push(() => removeVersionTable({
+        ...options,
+        driver: 'sqlite3',
+    }));
+
+    tests.push(async () => {
+        console.log('\n----- testing migration to 003 using sqlite3 -----');
+        const args = ['3', '--config', 'test/sqlite3-config.json'];
 
         return expect(run(args)).to.eventually.have.lengthOf(3).and.have.nested.property('2.version').equal(3);
     });

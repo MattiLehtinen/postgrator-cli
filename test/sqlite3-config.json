@@ -1,0 +1,4 @@
+{
+    "migrationPattern": "test/migrations/*",
+    "driver": "sqlite3"
+}
