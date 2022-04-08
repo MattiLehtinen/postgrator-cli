@@ -465,6 +465,7 @@ function buildTestsForOptions(options) {
     tests.push(() => removeVersionTable({
         ...options,
         driver: 'sqlite3',
+        database: ':memory:',
     }));
 
     tests.push(async () => {
