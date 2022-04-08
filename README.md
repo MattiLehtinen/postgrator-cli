@@ -34,6 +34,7 @@ And install the appropriate DB engine(s) if not installed yet:
 npm install pg@8
 npm install mysql@2
 npm install mssql@6
+npm install sqlite3@5
 ```
 
 See the [Postgrator](https://github.com/rickbergfalk/postgrator) documentation for more information about the supported engines.
@@ -137,10 +138,10 @@ postgrator drop-schema [--config=<config>]
 
 ```
   --to version                          Version number of the file to migrate to or 'max'. Default: 'max'
-  -r, --driver pg|mysql|mssql           Database driver. Default: 'pg'.
+  -r, --driver pg|mysql|mssql|sqlite3   Database driver. Default: 'pg'.
   -h, --host hostname                   Host.
   -o, --port port                       Port.
-  -d, --database database               Database name.
+  -d, --database database               Database name. (in the case of 'sqlite3' this is the filename, defaults to `:memory:`)
   -u, --username database               Username.
   -p, --password password               Password. If parameter without value is given, password will be asked.
   -m, --migration-pattern pattern       A pattern matching files to run migration files from. Default: 'migrations/*'
