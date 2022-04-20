@@ -1,5 +1,10 @@
 # Changelog
 
+## 6.0.0
+### April, 20, 2022
+* Drop support for node <= 12
+* Add support for node 18
+
 ## 5.2.0
 ### April, 9, 2022
 * Add support for `.postgratorrc.mjs` and `.postgratorrc.js` config files with `type: module`.
