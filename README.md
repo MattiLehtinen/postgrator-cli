@@ -16,7 +16,7 @@ Uses [Postgrator](https://github.com/rickbergfalk/postgrator) node.js library de
 
 ## Installation
 
-*As of postgrator-cli 5 Node.js version 12 or greater is required*
+*As of postgrator-cli 6 Node.js version 14 or greater is required*
 
 ```
 npm install -g postgrator-cli
