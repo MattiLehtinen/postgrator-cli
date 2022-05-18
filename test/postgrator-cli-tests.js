@@ -1,11 +1,11 @@
+import path from 'node:path';
+import readline from 'node:readline';
+import { createRequire } from 'node:module';
+
 import { expect, use } from 'chai';
-import path from 'path';
-import readline from 'readline';
 import eachSeries from 'p-each-series';
 import { pEvent as fromEvent } from 'p-event';
 import { dirname } from 'dirname-filename-esm';
-import { createRequire } from 'module';
-
 import { mockCwd } from 'mock-cwd';
 
 import getClient from '../lib/clients/index.js'; // eslint-disable-line import/extensions
@@ -27,7 +27,7 @@ const tests = [];
 let log = '';
 
 function consoleLogCapture(...args) {
-    log += [].slice.call(args);
+    log += Array.prototype.slice.call(args);
 }
 
 async function removeVersionTable(options) {
@@ -49,15 +49,11 @@ async function removeVersionTable(options) {
         execQuery: client.query,
     });
 
-    if (options.driver === 'sqlite3') {
-        await Promise.all([
-            pg.runQuery('DROP TABLE IF EXISTS schemaversion'),
-            pg.runQuery('DROP TABLE IF EXISTS animal'),
-            pg.runQuery('DROP TABLE IF EXISTS person'),
-        ]);
-    } else {
-        await pg.runQuery('DROP TABLE IF EXISTS schemaversion, animal, person');
-    }
+    await (options.driver === 'sqlite3' ? Promise.all([
+        pg.runQuery('DROP TABLE IF EXISTS schemaversion'),
+        pg.runQuery('DROP TABLE IF EXISTS animal'),
+        pg.runQuery('DROP TABLE IF EXISTS person'),
+    ]) : pg.runQuery('DROP TABLE IF EXISTS schemaversion, animal, person'));
     return client.end();
 }
 
@@ -65,17 +61,19 @@ function getDefaultOptions() {
     return parse();
 }
 
+function getArgList(opts) {
+    return Object.entries(opts)
+        .flatMap(([key, val]) => [
+            `--${key}`,
+            ...typeof val === 'boolean' || val === null ? [] : [val],
+        ]);
+}
+
 /* Build a set of tests for a given config.
    This will be helpful when we want to run the same kinds of tests on
    postgres, mysql, sql server, etc.
 ============================================================================= */
 function buildTestsForOptions(options) {
-    function getArgList(opts) {
-        return Object.entries(opts)
-            .map(([key, val]) => [`--${key}`].concat(typeof val === 'boolean' || val === null ? [] : [val]))
-            .flat();
-    }
-
     function resetMigrations(opts = options) {
         console.log('\n----- Reset migrations-----');
         return run(getArgList({ ...opts, to: 0 }));
@@ -91,7 +89,7 @@ function buildTestsForOptions(options) {
         });
 
         console.log = consoleLogCapture;
-        await expect(run(args)).to.become(undefined);
+        await expect(run(args)).to.become();
         console.log = originalConsoleLog;
         expect(log).to.match(/Examples/, 'No help was displayed');
     });
@@ -104,7 +102,7 @@ function buildTestsForOptions(options) {
         });
 
         console.log = consoleLogCapture;
-        await expect(run(args)).to.become(undefined);
+        await expect(run(args)).to.become();
         console.log = originalConsoleLog;
         expect(log).to.match(/Version: /, 'No version was displayed');
     });
@@ -484,7 +482,7 @@ function buildTestsForOptions(options) {
 
         await expect(run(args)).to.eventually.have.lengthOf(0);
         return expect(run(['drop-schema', '--config', 'test/sample-config.json']))
-            .to.become(undefined);
+            .to.become();
     });
 
     tests.push(async () => {
@@ -492,7 +490,7 @@ function buildTestsForOptions(options) {
 
         return mockCwd(path.join(__dirname, 'sample-config'), async () => {
             await expect(run(['0'])).to.eventually.have.lengthOf(0);
-            await expect(run(['drop-schema'])).to.become(undefined);
+            await expect(run(['drop-schema'])).to.become();
         });
     });
 
@@ -506,7 +504,7 @@ function buildTestsForOptions(options) {
 
         await expect(run(args)).to.eventually.have.lengthOf(0);
         return expect(run(['drop-schema', '--config', 'test/sample-config.json', '--schema-table', 'my-schema-table']))
-            .to.become(undefined);
+            .to.become();
     });
 
     tests.push(() => {
@@ -540,8 +538,9 @@ eachSeries(tests, (testFunc) => {
     return testFunc();
 }).then(() => {
     console.log('\nIt works!');
-    process.exit(0);
-}).catch((err) => {
+    process.exit(0); // eslint-disable-line unicorn/no-process-exit
+}).catch((e) => {
     console.log = originalConsoleLog;
-    console.log(err);
+    console.log(e);
+    throw e;
 });
