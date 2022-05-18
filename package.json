@@ -13,10 +13,7 @@
   "scripts": {
     "lint": "eslint --cache .",
     "test": "node test/postgrator-cli-tests.js",
-    "cover": "c8 npm test",
-    "prepublishOnly": "crlf --set=LF *.js",
-    "postpublish": "echo execute 'npm run restorecrlf' if in windows and using crlf line endings.",
-    "restorecrlf": "crlf --set=CRLF *.js"
+    "cover": "c8 npm test"
   },
   "repository": {
     "type": "git",
