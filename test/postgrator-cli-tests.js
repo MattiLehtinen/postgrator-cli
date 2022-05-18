@@ -538,9 +538,9 @@ eachSeries(tests, (testFunc) => {
     return testFunc();
 }).then(() => {
     console.log('\nIt works!');
-    process.exit(0); // eslint-disable-line unicorn/no-process-exit
+    process.exitCode = 0;
 }).catch((e) => {
     console.log = originalConsoleLog;
     console.log(e);
-    throw e;
+    return Promise.reject(e);
 });

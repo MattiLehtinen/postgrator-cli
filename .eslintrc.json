@@ -1,6 +1,6 @@
 {
-    "extends": ["airbnb-base", "plugin:unicorn/recommended"],
-    "plugins": ["unicorn"],
+    "extends": ["airbnb-base", "plugin:n/recommended", "plugin:unicorn/recommended"],
+    "plugins": ["n", "unicorn"],
     "parserOptions": {
         "ecmaVersion": "latest",
         "sourceType": "module"

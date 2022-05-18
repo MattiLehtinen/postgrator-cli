@@ -5,5 +5,5 @@ import { run } from './lib/postgrator-cli.js'; // eslint-disable-line import/ext
 
 run(argv).catch((e) => {
     console.log(`Error: ${e.message}`);
-    process.exit(1);
+    return Promise.reject(e);
 });
