@@ -18,7 +18,6 @@ jobs:
         mssql-version:
           - ^7.0.0
           - ^8.0.0
-        redis-version: [6]
 
     steps:
       - uses: actions/checkout@v3
@@ -29,7 +28,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Install dependencies
-        run: npm ci
+        uses: bahmutov/npm-install@v1
 
       - name: Install mssql
         run: npm install --no-save mssql@${{ matrix.mssql-version }}
