@@ -532,7 +532,7 @@ buildTestsForOptions(options);
 
 // Run the tests
 console.log(`Running ${tests.length} tests`);
-eachSeries(tests, (testFunc) => {
+await eachSeries(tests, (testFunc) => {
     console.log = originalConsoleLog;
     log = '';
     return testFunc();
