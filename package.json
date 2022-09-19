@@ -74,7 +74,7 @@
     "p-each-series": "^3.0.0",
     "p-event": "^5.0.1",
     "pg": "^8.8.0",
-    "sqlite3": "^5.0.11"
+    "sqlite3": "^5.1.1"
   },
   "peerDependencies": {
     "mssql": "^7.0.0 || ^8.0.0",
