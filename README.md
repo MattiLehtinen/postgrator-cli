@@ -165,7 +165,7 @@ Examples
 ## Tests
 To run postgrator tests locally, run `docker-compose up` and then `npm test`.
 
-[build-badge]: https://img.shields.io/github/workflow/status/MattiLehtinen/postgrator-cli/test/master?style=flat-square
+[build-badge]: https://img.shields.io/github/actions/workflow/status/MattiLehtinen/postgrator-cli/test.yml?event=push&style=flat-square
 [build]: https://github.com/MattiLehtinen/postgrator-cli/actions
 
 [npm-badge]: https://img.shields.io/npm/v/postgrator-cli.svg?style=flat-square
