@@ -73,7 +73,7 @@
     "mysql": "^2.18.1",
     "p-each-series": "^3.0.0",
     "p-event": "^5.0.1",
-    "pg": "^8.9.0",
+    "pg": "^8.10.0",
     "sqlite3": "^5.1.5"
   },
   "peerDependencies": {
