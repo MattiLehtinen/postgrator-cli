@@ -159,7 +159,7 @@ function buildTestsForOptions(options) {
         });
 
         const migrations = await run(args);
-        expect(migrations[migrations.length - 1].version).to.equal(3);
+        expect(migrations.at(-1).version).to.equal(3);
     });
 
     tests.push(() => {
@@ -426,7 +426,7 @@ function buildTestsForOptions(options) {
         console.log('\n----- testing using migration number at the end -----');
 
         const migrations = await run(['--config', 'test/sample-config.json', '0003']);
-        expect(migrations[migrations.length - 1].version).to.equal(3);
+        expect(migrations.at(-1).version).to.equal(3);
     });
 
     tests.push(resetMigrations);
