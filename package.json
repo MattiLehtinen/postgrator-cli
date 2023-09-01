@@ -69,7 +69,7 @@
     "eslint-plugin-n": "^16.0.1",
     "eslint-plugin-unicorn": "^48.0.1",
     "mock-cwd": "^1.0.0",
-    "mssql": "^9.1.1",
+    "mssql": "^9.2.0",
     "mysql": "^2.18.1",
     "p-each-series": "^3.0.0",
     "p-event": "^6.0.0",
