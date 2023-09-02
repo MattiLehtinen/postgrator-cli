@@ -52,7 +52,7 @@
     "lilconfig": "^2.1.0",
     "p-tap": "^4.0.0",
     "postgrator": "^7.2.0",
-    "yaml": "^2.3.1"
+    "yaml": "^2.3.2"
   },
   "devDependencies": {
     "c8": "^8.0.1",
