@@ -49,7 +49,7 @@
   "dependencies": {
     "command-line-args": "^5.2.1",
     "command-line-usage": "^7.0.1",
-    "lilconfig": "^2.1.0",
+    "lilconfig": "^3.0.0",
     "p-tap": "^4.0.0",
     "postgrator": "^7.2.0",
     "yaml": "^2.3.3"
