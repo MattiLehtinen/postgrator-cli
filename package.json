@@ -67,7 +67,7 @@
     "eslint-plugin-eslint-comments": "^3.2.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-n": "^16.3.1",
-    "eslint-plugin-unicorn": "^49.0.0",
+    "eslint-plugin-unicorn": "^50.0.1",
     "mock-cwd": "^1.0.0",
     "mssql": "^10.0.1",
     "mysql": "^2.18.1",
