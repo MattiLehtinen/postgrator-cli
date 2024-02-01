@@ -55,7 +55,7 @@
     "yaml": "^2.3.4"
   },
   "devDependencies": {
-    "c8": "^8.0.1",
+    "c8": "^9.1.0",
     "chai": "^4.3.10",
     "chai-as-promised": "^7.1.1",
     "chai-subset": "^1.6.0",
