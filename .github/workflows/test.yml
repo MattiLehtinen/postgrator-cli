@@ -12,9 +12,9 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 16.x
           - 18.x
           - 20.x
+          - 22.x
         mssql-version:
           - ^7.0.0
           - ^8.0.0

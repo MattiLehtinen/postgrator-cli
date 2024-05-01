@@ -1,99 +1,99 @@
 {
-  "name": "postgrator-cli",
-  "version": "7.0.0",
-  "description": "Command line interface for Postgrator",
-  "author": "Matti Lehtinen <matlehti@gmail.com> (https://twitter.com/MattiLehtinen)",
-  "type": "module",
-  "bin": {
-    "postgrator": "./index.js"
-  },
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "scripts": {
-    "lint": "eslint --cache .",
-    "test": "node test/postgrator-cli-tests.js",
-    "cover": "c8 npm test"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/MattiLehtinen/postgrator-cli"
-  },
-  "files": [
-    "LICENSE.md",
-    "README.md",
-    "index.js",
-    "lib"
-  ],
-  "keywords": [
-    "cli",
-    "command",
-    "line",
-    "npm",
-    "scripts",
-    "postgrator",
-    "postgres",
-    "sql",
-    "migrator",
-    "migration",
-    "runner",
-    "mysql",
-    "sql",
-    "import",
-    "files",
-    "server",
-    "version control",
-    "source control"
-  ],
-  "license": "MIT",
-  "dependencies": {
-    "command-line-args": "^5.2.1",
-    "command-line-usage": "^7.0.1",
-    "lilconfig": "^3.1.1",
-    "p-tap": "^4.0.0",
-    "postgrator": "^7.2.0",
-    "yaml": "^2.4.1"
-  },
-  "devDependencies": {
-    "@eslint-community/eslint-plugin-eslint-comments": "^4.3.0",
-    "c8": "^9.1.0",
-    "chai": "^4.4.1",
-    "chai-as-promised": "^7.1.1",
-    "chai-subset": "^1.6.0",
-    "crlf": "^1.1.1",
-    "dirname-filename-esm": "^1.1.1",
-    "dirty-chai": "^2.0.1",
-    "eslint": "^8.57.0",
-    "eslint-config-airbnb-base": "^15.0.0",
-    "eslint-plugin-import": "^2.29.1",
-    "eslint-plugin-n": "^16.6.2",
-    "eslint-plugin-unicorn": "^51.0.1",
-    "mock-cwd": "^1.0.0",
-    "mssql": "^10.0.2",
-    "mysql": "^2.18.1",
-    "p-each-series": "^3.0.0",
-    "p-event": "^6.0.1",
-    "pg": "^8.11.4",
-    "sqlite3": "^5.1.7"
-  },
-  "peerDependencies": {
-    "mssql": "^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0",
-    "mysql": "^2.0.0",
-    "pg": "^8.0.0",
-    "sqlite3": "^5.0.0"
-  },
-  "peerDependenciesMeta": {
-    "mssql": {
-      "optional": true
+    "name": "postgrator-cli",
+    "version": "7.0.0",
+    "description": "Command line interface for Postgrator",
+    "author": "Matti Lehtinen <matlehti@gmail.com> (https://twitter.com/MattiLehtinen)",
+    "type": "module",
+    "bin": {
+        "postgrator": "./index.js"
     },
-    "mysql": {
-      "optional": true
+    "engines": {
+        "node": ">=18.0.0"
     },
-    "sqlite3": {
-      "optional": true
+    "scripts": {
+        "lint": "eslint --cache .",
+        "test": "node test/postgrator-cli-tests.js",
+        "cover": "c8 npm test"
     },
-    "pg": {
-      "optional": true
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/MattiLehtinen/postgrator-cli"
+    },
+    "files": [
+        "LICENSE.md",
+        "README.md",
+        "index.js",
+        "lib"
+    ],
+    "keywords": [
+        "cli",
+        "command",
+        "line",
+        "npm",
+        "scripts",
+        "postgrator",
+        "postgres",
+        "sql",
+        "migrator",
+        "migration",
+        "runner",
+        "mysql",
+        "sql",
+        "import",
+        "files",
+        "server",
+        "version control",
+        "source control"
+    ],
+    "license": "MIT",
+    "dependencies": {
+        "command-line-args": "^5.2.1",
+        "command-line-usage": "^7.0.1",
+        "lilconfig": "^3.1.1",
+        "p-tap": "^4.0.0",
+        "postgrator": "^7.2.0",
+        "yaml": "^2.4.1"
+    },
+    "devDependencies": {
+        "@eslint-community/eslint-plugin-eslint-comments": "^4.3.0",
+        "c8": "^9.1.0",
+        "chai": "^4.4.1",
+        "chai-as-promised": "^7.1.1",
+        "chai-subset": "^1.6.0",
+        "crlf": "^1.1.1",
+        "dirname-filename-esm": "^1.1.1",
+        "dirty-chai": "^2.0.1",
+        "eslint": "^8.57.0",
+        "eslint-config-airbnb-base": "^15.0.0",
+        "eslint-plugin-import": "^2.29.1",
+        "eslint-plugin-n": "^16.6.2",
+        "eslint-plugin-unicorn": "^51.0.1",
+        "mock-cwd": "^1.0.0",
+        "mssql": "^10.0.2",
+        "mysql": "^2.18.1",
+        "p-each-series": "^3.0.0",
+        "p-event": "^6.0.1",
+        "pg": "^8.11.4",
+        "sqlite3": "^5.1.7"
+    },
+    "peerDependencies": {
+        "mssql": "^7.0.0 || ^8.0.0 || ^9.0.0 || ^10.0.0",
+        "mysql": "^2.0.0",
+        "pg": "^8.0.0",
+        "sqlite3": "^5.0.0"
+    },
+    "peerDependenciesMeta": {
+        "mssql": {
+            "optional": true
+        },
+        "mysql": {
+            "optional": true
+        },
+        "sqlite3": {
+            "optional": true
+        },
+        "pg": {
+            "optional": true
+        }
     }
-  }
 }
