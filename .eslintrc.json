@@ -28,6 +28,7 @@
         "unicorn/prevent-abbreviations": "off",
         "unicorn/no-nested-ternary": "off",
         "unicorn/no-array-push-push": "off",
+        "unicorn/no-anonymous-default-export": "off",
         "unicorn/no-null": "off",
         "unicorn/no-useless-promise-resolve-reject": "off",
         "unicorn/catch-error-name": ["error", { "name": "e" }],
