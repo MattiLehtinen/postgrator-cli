@@ -67,7 +67,7 @@
         "eslint-config-airbnb-base": "^15.0.0",
         "eslint-plugin-import": "^2.29.1",
         "eslint-plugin-n": "^17.4.0",
-        "eslint-plugin-unicorn": "^52.0.0",
+        "eslint-plugin-unicorn": "^53.0.0",
         "mock-cwd": "^1.0.0",
         "mssql": "^10.0.2",
         "mysql": "^2.18.1",
