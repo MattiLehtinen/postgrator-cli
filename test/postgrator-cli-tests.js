@@ -1,23 +1,18 @@
 import path from 'node:path';
 import readline from 'node:readline';
-import { createRequire } from 'node:module';
 
 import { expect, use } from 'chai';
 import eachSeries from 'p-each-series';
 import { pEvent as fromEvent } from 'p-event';
-import { dirname } from 'dirname-filename-esm';
 import { mockCwd } from 'mock-cwd';
 
 import getClient from '../lib/clients/index.js'; // eslint-disable-line import/extensions
 import parse from '../lib/command-line-options.js'; // eslint-disable-line import/extensions
 import { run } from '../lib/postgrator-cli.js'; // eslint-disable-line import/extensions
 
-const __dirname = dirname(import.meta); // eslint-disable-line no-underscore-dangle
-const require = createRequire(import.meta.url);
-
-use(require('chai-subset'));
-use(require('chai-as-promised'));
-use(require('dirty-chai'));
+use((await import('chai-subset')).default); // eslint-disable-line unicorn/no-await-expression-member
+use((await import('chai-as-promised')).default); // eslint-disable-line unicorn/no-await-expression-member
+use((await import('dirty-chai')).default); // eslint-disable-line unicorn/no-await-expression-member
 
 const MAX_REVISION = 5;
 const originalConsoleLog = console.log;
