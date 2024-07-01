@@ -58,7 +58,7 @@
         "@eslint-community/eslint-plugin-eslint-comments": "^4.3.0",
         "c8": "^10.1.2",
         "chai": "^4.4.1",
-        "chai-as-promised": "^7.1.2",
+        "chai-as-promised": "^8.0.0",
         "chai-subset": "^1.6.0",
         "crlf": "^1.1.1",
         "dirname-filename-esm": "^1.1.1",
