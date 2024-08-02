@@ -40,7 +40,7 @@ jobs:
         run: npm run lint
 
       - name: Start databases
-        run: docker-compose up -d
+        run: docker compose up -d
 
       - name: Wait for databases to be available
         run: sleep 10
@@ -49,7 +49,7 @@ jobs:
         run: npm run cover
 
       - name: Stop databases
-        run: docker-compose down
+        run: docker compose down
 
       - name: Publish to coveralls.io
         uses: coverallsapp/github-action@master
