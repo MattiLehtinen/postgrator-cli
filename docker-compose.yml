@@ -19,7 +19,7 @@ services:
       - "3306:3306"
   # SQL Server needs 2.00 GB of RAM
   sqlserver:
-    image: "mcr.microsoft.com/mssql/server:2019-CU8-ubuntu-16.04"
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
     environment:
       ACCEPT_EULA: Y
       SA_PASSWORD: Postgrator123!
