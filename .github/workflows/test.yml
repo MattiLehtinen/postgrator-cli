@@ -12,7 +12,6 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 18.x
           - 20.x
           - 22.x
         mssql-version:
@@ -40,21 +39,13 @@ jobs:
         run: npm run lint
 
       - name: Start databases
-        run: docker compose up -d
+        uses: hoverkraft-tech/compose-action@v2.0.2
 
       - name: Wait for databases to be available
         run: sleep 10
 
-      - name: Debug
-        run: |
-            netstat -tulpn
-            docker ps
-
       - name: Test
         run: npm run cover
-
-      - name: Stop databases
-        run: docker compose down
 
       - name: Publish to coveralls.io
         uses: coverallsapp/github-action@master
