@@ -23,7 +23,7 @@ jobs:
       run: npm run lint
 
     - name: Start databases
-      run: docker-compose up -d
+      uses: hoverkraft-tech/compose-action@v2.0.2
 
     - name: Wait for databases to be available
       run: sleep 10
@@ -34,6 +34,3 @@ jobs:
     - run: npm publish
       env:
         NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
-
-    - name: Stop databases
-      run: docker-compose down
