@@ -12,9 +12,9 @@ jobs:
     strategy:
       matrix:
         node-version:
-          - 18.x
           - 20.x
           - 22.x
+          - 24.x
         mssql-version:
           - ^7.0.0
           - ^8.0.0
@@ -44,11 +44,6 @@ jobs:
 
       - name: Wait for databases to be available
         run: sleep 10
-
-      - name: Debug
-        run: |
-            netstat -tulpn
-            docker ps
 
       - name: Test
         run: npm run cover
