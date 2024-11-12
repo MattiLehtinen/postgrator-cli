@@ -40,16 +40,13 @@ jobs:
         run: npm run lint
 
       - name: Start databases
-        run: docker compose up -d
+        uses: hoverkraft-tech/compose-action@v2
 
       - name: Wait for databases to be available
         run: sleep 10
 
       - name: Test
         run: npm run cover
-
-      - name: Stop databases
-        run: docker compose down
 
       - name: Publish to coveralls.io
         uses: coverallsapp/github-action@master
