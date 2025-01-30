@@ -39,7 +39,7 @@ jobs:
         run: npm run lint
 
       - name: Start databases
-        uses: hoverkraft-tech/compose-action@v2.1.0
+        uses: hoverkraft-tech/compose-action@v2.2.0
 
       - name: Wait for databases to be available
         run: sleep 10
