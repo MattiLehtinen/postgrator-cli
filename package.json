@@ -63,7 +63,7 @@
         "crlf": "^1.1.1",
         "dirname-filename-esm": "^1.1.2",
         "dirty-chai": "^2.0.1",
-        "eslint": "^8.57.0",
+        "eslint": "^9.30.1",
         "eslint-config-airbnb-base": "^15.0.0",
         "eslint-plugin-import": "^2.32.0",
         "eslint-plugin-n": "^17.20.0",
