@@ -8,7 +8,7 @@
         "postgrator": "./index.js"
     },
     "engines": {
-        "node": ">=20.0.0"
+        "node": "^20.11.0 || >=22.0.0"
     },
     "scripts": {
         "lint": "eslint --cache .",
@@ -61,7 +61,6 @@
         "chai-as-promised": "^8.0.2",
         "chai-subset": "^1.6.0",
         "crlf": "^1.1.1",
-        "dirname-filename-esm": "^1.1.2",
         "dirty-chai": "^2.0.1",
         "eslint": "^8.57.0",
         "eslint-config-airbnb-base": "^15.0.0",

@@ -2,7 +2,6 @@ import path from 'node:path';
 import readline from 'node:readline';
 
 import { expect, use } from 'chai';
-import { dirname } from 'dirname-filename-esm';
 import { mockCwd } from 'mock-cwd';
 import eachSeries from 'p-each-series';
 import { pEvent as fromEvent } from 'p-event';
@@ -10,8 +9,6 @@ import { pEvent as fromEvent } from 'p-event';
 import getClient from '../lib/clients/index.js'; // eslint-disable-line import/extensions
 import parse from '../lib/command-line-options.js'; // eslint-disable-line import/extensions
 import { run } from '../lib/postgrator-cli.js'; // eslint-disable-line import/extensions
-
-const __dirname = dirname(import.meta); // eslint-disable-line no-underscore-dangle
 
 use((await import('chai-subset')).default); // eslint-disable-line unicorn/no-await-expression-member
 use((await import('chai-as-promised')).default); // eslint-disable-line unicorn/no-await-expression-member
@@ -166,7 +163,7 @@ function buildTestsForOptions(options) {
             to: '02',
         });
 
-        return mockCwd(path.join(__dirname, 'sample-config'), async () => {
+        return mockCwd(path.join(import.meta.dirname, 'sample-config'), async () => {
             await expect(run(args)).to.eventually.containSubset({
                 0: {
                     version: 3,
@@ -182,7 +179,7 @@ function buildTestsForOptions(options) {
             to: '03',
         });
 
-        return mockCwd(path.join(__dirname, 'sample-config-esm'), async () => {
+        return mockCwd(path.join(import.meta.dirname, 'sample-config-esm'), async () => {
             await expect(run(args)).to.eventually.containSubset({
                 0: {
                     version: 3,
@@ -198,7 +195,7 @@ function buildTestsForOptions(options) {
             to: '02',
         });
 
-        return mockCwd(path.join(__dirname, 'sample-config-cjs'), async () => {
+        return mockCwd(path.join(import.meta.dirname, 'sample-config-cjs'), async () => {
             await expect(run(args)).to.eventually.containSubset({
                 0: {
                     version: 3,
@@ -214,7 +211,7 @@ function buildTestsForOptions(options) {
             to: '06',
         });
 
-        return mockCwd(path.join(__dirname, 'multi-patterns-config'), async () => {
+        return mockCwd(path.join(import.meta.dirname, 'multi-patterns-config'), async () => {
             await expect(run(args)).to.eventually.containSubset({
                 0: {
                     version: 3,
@@ -230,7 +227,7 @@ function buildTestsForOptions(options) {
             to: '02',
         });
 
-        return mockCwd(path.join(__dirname, 'multi-patterns-config'), async () => {
+        return mockCwd(path.join(import.meta.dirname, 'multi-patterns-config'), async () => {
             await expect(run(args)).to.eventually.containSubset([{ version: 3, action: 'undo' }]);
         });
     });
@@ -279,7 +276,7 @@ function buildTestsForOptions(options) {
     tests.push(() => {
         console.log('\n----- testing using latest revision with config file set by absolute path-----');
         const args = getArgList({
-            config: path.resolve(__dirname, './sample-config.json'),
+            config: path.resolve(import.meta.dirname, './sample-config.json'),
         });
 
         return expect(run(args)).to.eventually.have.lengthOf(MAX_REVISION);
@@ -288,7 +285,7 @@ function buildTestsForOptions(options) {
     tests.push(() => {
         console.log('\n----- testing it does not re-apply same migrations -----');
 
-        return mockCwd(path.join(__dirname, 'sample-config'), async () => {
+        return mockCwd(path.join(import.meta.dirname, 'sample-config'), async () => {
             await expect(run()).to.eventually.have.lengthOf(0);
         });
     });
@@ -299,7 +296,7 @@ function buildTestsForOptions(options) {
         console.log('\n----- testing preferring cli arguments over config options-----');
         const args = getArgList({
             username: 'invaliduser',
-            config: path.resolve(__dirname, './sample-config.json'),
+            config: path.resolve(import.meta.dirname, './sample-config.json'),
         });
 
         return expect(run(args)).to.be.rejectedWith(Error, /^password authentication failed for user "invaliduser"/);
@@ -348,7 +345,7 @@ function buildTestsForOptions(options) {
             to: 'max',
         });
 
-        return mockCwd(path.join(__dirname, 'config-with-non-existing-directory'), async () => {
+        return mockCwd(path.join(import.meta.dirname, 'config-with-non-existing-directory'), async () => {
             await expect(run(args)).to.eventually.have.lengthOf(MAX_REVISION).and.containSubset({
                 [MAX_REVISION - 1]: {
                     version: MAX_REVISION,
@@ -365,7 +362,7 @@ function buildTestsForOptions(options) {
             to: 'max',
         });
 
-        return mockCwd(path.join(__dirname, 'config-with-other-directory'), async () => {
+        return mockCwd(path.join(import.meta.dirname, 'config-with-other-directory'), async () => {
             await expect(run(args)).to.eventually.have.lengthOf(2);
             await resetMigrations({});
         });
@@ -513,7 +510,7 @@ function buildTestsForOptions(options) {
     tests.push(async () => {
         console.log('\n----- testing dropping schema table with default configuration file -----');
 
-        return mockCwd(path.join(__dirname, 'sample-config'), async () => {
+        return mockCwd(path.join(import.meta.dirname, 'sample-config'), async () => {
             await expect(run(['0'])).to.eventually.have.lengthOf(0);
             await expect(run(['drop-schema'])).to.become();
         });
