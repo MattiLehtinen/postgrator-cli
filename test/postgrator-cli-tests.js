@@ -56,12 +56,16 @@ function getDefaultOptions() {
     return parse();
 }
 
+function getArg(key, val) {
+    return [
+        `--${key}`,
+        ...typeof val === 'boolean' || val === null ? [] : [val],
+    ];
+}
+
 function getArgList(opts) {
     return Object.entries(opts)
-        .flatMap(([key, val]) => [
-            `--${key}`,
-            ...typeof val === 'boolean' || val === null ? [] : [val],
-        ]);
+        .flatMap(([key, val]) => (Array.isArray(val) ? val.flatMap((v) => getArg(key, v)) : getArg(key, val)));
 }
 
 /* Build a set of tests for a given config.
@@ -213,9 +217,10 @@ function buildTestsForOptions(options) {
 
         return mockCwd(path.join(import.meta.dirname, 'multi-patterns-config'), async () => {
             await expect(run(args)).to.eventually.containSubset({
-                0: {
-                    version: 3,
+                3: {
+                    version: 6,
                     action: 'do',
+                    filename: (file) => file.endsWith('seeds/006.do.some-description.sql'),
                 },
             });
         });
@@ -230,6 +235,34 @@ function buildTestsForOptions(options) {
         return mockCwd(path.join(import.meta.dirname, 'multi-patterns-config'), async () => {
             await expect(run(args)).to.eventually.containSubset([{ version: 3, action: 'undo' }]);
         });
+    });
+
+    tests.push(() => {
+        console.log('\n----- testing migration from 002 to 006 using multi pattern args -----');
+        const args = getArgList({
+            ...options,
+            to: '06',
+            'migration-pattern': [path.join(import.meta.dirname, 'migrations/*'), path.join(import.meta.dirname, 'seeds/*')],
+        });
+
+        return expect(run(args)).to.eventually.containSubset({
+            3: {
+                version: 6,
+                action: 'do',
+                filename: (file) => file.endsWith('seeds/006.do.some-description.sql'),
+            },
+        });
+    });
+
+    tests.push(() => {
+        console.log('\n----- testing migration from 006 to 002 using multi pattern args -----');
+        const args = getArgList({
+            ...options,
+            to: '02',
+            'migration-pattern': [path.join(import.meta.dirname, 'migrations/*'), path.join(import.meta.dirname, 'seeds/*')],
+        });
+
+        return expect(run(args)).to.eventually.containSubset([{ version: 3, action: 'undo' }]);
     });
 
     tests.push(async () => {
