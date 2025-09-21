@@ -2,10 +2,10 @@ import path from 'node:path';
 import readline from 'node:readline';
 
 import { expect, use } from 'chai';
-import eachSeries from 'p-each-series';
-import { pEvent as fromEvent } from 'p-event';
 import { dirname } from 'dirname-filename-esm';
 import { mockCwd } from 'mock-cwd';
+import eachSeries from 'p-each-series';
+import { pEvent as fromEvent } from 'p-event';
 
 import getClient from '../lib/clients/index.js'; // eslint-disable-line import/extensions
 import parse from '../lib/command-line-options.js'; // eslint-disable-line import/extensions
@@ -205,6 +205,33 @@ function buildTestsForOptions(options) {
                     action: 'undo',
                 },
             });
+        });
+    });
+
+    tests.push(() => {
+        console.log('\n----- testing migration from 002 to 006 using multi patterns config file -----');
+        const args = getArgList({
+            to: '06',
+        });
+
+        return mockCwd(path.join(__dirname, 'multi-patterns-config'), async () => {
+            await expect(run(args)).to.eventually.containSubset({
+                0: {
+                    version: 3,
+                    action: 'do',
+                },
+            });
+        });
+    });
+
+    tests.push(() => {
+        console.log('\n----- testing migration from 006 to 002 using multi patterns config file -----');
+        const args = getArgList({
+            to: '02',
+        });
+
+        return mockCwd(path.join(__dirname, 'multi-patterns-config'), async () => {
+            await expect(run(args)).to.eventually.containSubset([{ version: 3, action: 'undo' }]);
         });
     });
 
@@ -503,6 +530,12 @@ function buildTestsForOptions(options) {
         await expect(run(args)).to.eventually.have.lengthOf(0);
         return expect(run(['drop-schema', '--config', 'test/sample-config.json', '--schema-table', 'my-schema-table']))
             .to.become();
+    });
+
+    tests.push(() => {
+        console.log('\n----- testing dropping schema table that does not exist -----');
+        return expect(run(['drop-schema', '--config', 'test/sample-config.json']))
+            .to.be.rejectedWith(Error, 'table "schemaversion" does not exist');
     });
 
     tests.push(() => {
