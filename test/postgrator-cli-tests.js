@@ -10,7 +10,6 @@ import getClient from '../lib/clients/index.js'; // eslint-disable-line import/e
 import parse from '../lib/command-line-options.js'; // eslint-disable-line import/extensions
 import { run } from '../lib/postgrator-cli.js'; // eslint-disable-line import/extensions
 
-use((await import('chai-subset')).default); // eslint-disable-line unicorn/no-await-expression-member
 use((await import('chai-as-promised')).default); // eslint-disable-line unicorn/no-await-expression-member
 use((await import('dirty-chai')).default); // eslint-disable-line unicorn/no-await-expression-member
 
