@@ -55,7 +55,7 @@
         "yaml": "^2.8.4"
     },
     "devDependencies": {
-        "@eslint-community/eslint-plugin-eslint-comments": "^4.7.1",
+        "@eslint-community/eslint-plugin-eslint-comments": "^4.7.2",
         "c8": "^11.0.0",
         "chai": "^6.2.2",
         "chai-as-promised": "^8.0.2",
