@@ -1,3 +1,4 @@
+// eslint-disable-next-line unicorn/prefer-module
 module.exports = {
     migrationPattern: '../migrations/*',
     driver: 'pg',
@@ -5,5 +6,5 @@ module.exports = {
     port: 5432,
     database: 'postgrator',
     username: 'postgrator',
-    password: 'postgrator'
+    password: 'postgrator',
 }
