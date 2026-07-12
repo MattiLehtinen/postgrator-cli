@@ -6,9 +6,9 @@ import { mockCwd } from 'mock-cwd';
 import eachSeries from 'p-each-series';
 import { pEvent as fromEvent } from 'p-event';
 
-import getClient from '../lib/clients/index.js'; // eslint-disable-line import/extensions
-import parse from '../lib/command-line-options.js'; // eslint-disable-line import/extensions
-import { run } from '../lib/postgrator-cli.js'; // eslint-disable-line import/extensions
+import getClient from '../lib/clients/index.js';
+import parse from '../lib/command-line-options.js';
+import { run } from '../lib/postgrator-cli.js';
 
 use((await import('chai-as-promised')).default); // eslint-disable-line unicorn/no-await-expression-member
 use((await import('dirty-chai')).default); // eslint-disable-line unicorn/no-await-expression-member
@@ -77,9 +77,7 @@ function buildTestsForOptions(options) {
         return run(getArgList({ ...opts, to: 0 }));
     }
 
-    tests.push(() => removeVersionTable(options));
-
-    tests.push(async () => {
+    tests.push(() => removeVersionTable(options), async () => {
         console.log('\n----- testing show help (output suppressed)-----');
         const args = getArgList({
             ...options,
@@ -90,9 +88,7 @@ function buildTestsForOptions(options) {
         await expect(run(args)).to.become();
         console.log = originalConsoleLog;
         expect(log).to.match(/Examples/, 'No help was displayed');
-    });
-
-    tests.push(async () => {
+    }, async () => {
         console.log('\n----- testing show version (output suppressed)-----');
         const args = getArgList({
             ...options,
@@ -103,23 +99,17 @@ function buildTestsForOptions(options) {
         await expect(run(args)).to.become();
         console.log = originalConsoleLog;
         expect(log).to.match(/Version: /, 'No version was displayed');
-    });
-
-    tests.push(() => {
+    }, () => {
         console.log('\n----- testing an invalid command-----');
 
         return expect(run(['invalid-command', '--config', 'test/sample-config.json']))
             .to.be.rejectedWith(Error, 'Invalid command.');
-    });
-
-    tests.push(async () => {
+    }, async () => {
         console.log('\n----- testing migration to 003 -----');
         return expect(run(getArgList(options)))
             .to.eventually.have.lengthOf(3)
             .and.have.nested.property('2.version').equal(3);
-    });
-
-    tests.push(async () => {
+    }, async () => {
         console.log('\n----- testing migration to 000 with conflict detection-----');
         const args = getArgList({
             ...options,
@@ -132,9 +122,7 @@ function buildTestsForOptions(options) {
                 action: 'undo',
             },
         });
-    });
-
-    tests.push(async () => {
+    }, async () => {
         console.log('\n----- testing migration to 001 -----');
         const args = getArgList({
             ...options,
@@ -147,9 +135,7 @@ function buildTestsForOptions(options) {
                 action: 'do',
             },
         });
-    });
-
-    tests.push(async () => {
+    }, async () => {
         console.log('\n----- testing migration from 001 to 003 using config file defined explicitly -----');
         const args = getArgList({
             to: '0003',
@@ -158,14 +144,13 @@ function buildTestsForOptions(options) {
 
         const migrations = await run(args);
         expect(migrations.at(-1).version).to.equal(3);
-    });
-
-    tests.push(() => {
+    }, () => {
         console.log('\n----- testing migration from 003 to 002 using config file -----');
         const args = getArgList({
             to: '02',
         });
 
+        // eslint-disable-next-line n/no-unsupported-features/node-builtins
         return mockCwd(path.join(import.meta.dirname, 'sample-config'), async () => {
             await expect(run(args)).to.eventually.containSubset({
                 0: {
@@ -174,14 +159,13 @@ function buildTestsForOptions(options) {
                 },
             });
         });
-    });
-
-    tests.push(() => {
+    }, () => {
         console.log('\n----- testing migration from 002 to 003 using esm config file -----');
         const args = getArgList({
             to: '03',
         });
 
+        // eslint-disable-next-line n/no-unsupported-features/node-builtins
         return mockCwd(path.join(import.meta.dirname, 'sample-config-esm'), async () => {
             await expect(run(args)).to.eventually.containSubset({
                 0: {
@@ -190,14 +174,13 @@ function buildTestsForOptions(options) {
                 },
             });
         });
-    });
-
-    tests.push(() => {
+    }, () => {
         console.log('\n----- testing migration from 003 to 002 using cjs config file -----');
         const args = getArgList({
             to: '02',
         });
 
+        // eslint-disable-next-line n/no-unsupported-features/node-builtins
         return mockCwd(path.join(import.meta.dirname, 'sample-config-cjs'), async () => {
             await expect(run(args)).to.eventually.containSubset({
                 0: {
@@ -206,14 +189,13 @@ function buildTestsForOptions(options) {
                 },
             });
         });
-    });
-
-    tests.push(() => {
+    }, () => {
         console.log('\n----- testing migration from 002 to 006 using multi patterns config file -----');
         const args = getArgList({
             to: '06',
         });
 
+        // eslint-disable-next-line n/no-unsupported-features/node-builtins
         return mockCwd(path.join(import.meta.dirname, 'multi-patterns-config'), async () => {
             await expect(run(args)).to.eventually.containSubset({
                 3: {
@@ -223,24 +205,22 @@ function buildTestsForOptions(options) {
                 },
             });
         });
-    });
-
-    tests.push(() => {
+    }, () => {
         console.log('\n----- testing migration from 006 to 002 using multi patterns config file -----');
         const args = getArgList({
             to: '02',
         });
 
+        // eslint-disable-next-line n/no-unsupported-features/node-builtins
         return mockCwd(path.join(import.meta.dirname, 'multi-patterns-config'), async () => {
             await expect(run(args)).to.eventually.containSubset([{ version: 3, action: 'undo' }]);
         });
-    });
-
-    tests.push(() => {
+    }, () => {
         console.log('\n----- testing migration from 002 to 006 using multi pattern args -----');
         const args = getArgList({
             ...options,
             to: '06',
+            // eslint-disable-next-line n/no-unsupported-features/node-builtins
             'migration-pattern': [path.join(import.meta.dirname, 'migrations/*'), path.join(import.meta.dirname, 'seeds/*')],
         });
 
@@ -251,20 +231,17 @@ function buildTestsForOptions(options) {
                 filename: (file) => file.endsWith('seeds/006.do.some-description.sql'),
             },
         });
-    });
-
-    tests.push(() => {
+    }, () => {
         console.log('\n----- testing migration from 006 to 002 using multi pattern args -----');
         const args = getArgList({
             ...options,
             to: '02',
+            // eslint-disable-next-line n/no-unsupported-features/node-builtins
             'migration-pattern': [path.join(import.meta.dirname, 'migrations/*'), path.join(import.meta.dirname, 'seeds/*')],
         });
 
         return expect(run(args)).to.eventually.containSubset([{ version: 3, action: 'undo' }]);
-    });
-
-    tests.push(async () => {
+    }, async () => {
         console.log('\n----- testing non-existing config file-----');
         const args = getArgList({
             to: '003',
@@ -272,11 +249,7 @@ function buildTestsForOptions(options) {
         });
 
         await expect(run(args)).to.be.rejectedWith(Error, /^Config file not found:/);
-    });
-
-    tests.push(resetMigrations);
-
-    tests.push(() => {
+    }, resetMigrations, () => {
         console.log('\n----- testing merging cli and config options -----');
         const args = getArgList({
             to: '003',
@@ -285,11 +258,7 @@ function buildTestsForOptions(options) {
         });
 
         return expect(run(args)).to.eventually.have.lengthOf(3);
-    });
-
-    tests.push(resetMigrations);
-
-    tests.push(async () => {
+    }, resetMigrations, async () => {
         console.log('\n----- testing using latest revision without specifying to-----');
         const args = getArgList({
             ...options,
@@ -301,42 +270,31 @@ function buildTestsForOptions(options) {
                 version: MAX_REVISION,
             },
         });
-    });
-
-    tests.push(resetMigrations);
-
-    tests.push(() => {
+    }, resetMigrations, () => {
         console.log('\n----- testing using latest revision with config file set by absolute path-----');
         const args = getArgList({
+            // eslint-disable-next-line n/no-unsupported-features/node-builtins
             config: path.resolve(import.meta.dirname, './sample-config.json'),
         });
 
         return expect(run(args)).to.eventually.have.lengthOf(MAX_REVISION);
-    });
-
-    tests.push(() => {
+    }, () => {
         console.log('\n----- testing it does not re-apply same migrations -----');
 
+        // eslint-disable-next-line n/no-unsupported-features/node-builtins
         return mockCwd(path.join(import.meta.dirname, 'sample-config'), async () => {
             await expect(run()).to.eventually.have.lengthOf(0);
         });
-    });
-
-    tests.push(resetMigrations);
-
-    tests.push(() => {
+    }, resetMigrations, () => {
         console.log('\n----- testing preferring cli arguments over config options-----');
         const args = getArgList({
             username: 'invaliduser',
+            // eslint-disable-next-line n/no-unsupported-features/node-builtins
             config: path.resolve(import.meta.dirname, './sample-config.json'),
         });
 
         return expect(run(args)).to.be.rejectedWith(Error, /^password authentication failed for user "invaliduser"/);
-    });
-
-    tests.push(resetMigrations);
-
-    tests.push(async () => {
+    }, resetMigrations, async () => {
         console.log('\n----- testing using environment variables to run migrations -----');
         process.env.PGHOST = options.host;
         process.env.PGPORT = options.port;
@@ -350,9 +308,7 @@ function buildTestsForOptions(options) {
         process.env.PGUSER = undefined;
         process.env.PGPASSWORD = undefined;
         process.env.PGDATABASE = undefined;
-    });
-
-    tests.push(async () => {
+    }, async () => {
         console.log('\n----- testing with no migration files found-----');
         const args = getArgList({
             ...options,
@@ -364,11 +320,7 @@ function buildTestsForOptions(options) {
         await expect(run(args)).to.be.rejectedWith(Error, /^No migration files found/);
         console.log = originalConsoleLog;
         expect(log).not.to.match(/Examples/, "Help was displayed when shouldn't");
-    });
-
-    tests.push(resetMigrations);
-
-    tests.push(() => {
+    }, resetMigrations, () => {
         console.log('\n----- testing ignoring config file -----');
         const args = getArgList({
             ...options,
@@ -377,6 +329,7 @@ function buildTestsForOptions(options) {
             to: 'max',
         });
 
+        // eslint-disable-next-line n/no-unsupported-features/node-builtins
         return mockCwd(path.join(import.meta.dirname, 'config-with-non-existing-directory'), async () => {
             await expect(run(args)).to.eventually.have.lengthOf(MAX_REVISION).and.containSubset({
                 [MAX_REVISION - 1]: {
@@ -384,23 +337,18 @@ function buildTestsForOptions(options) {
                 },
             });
         });
-    });
-
-    tests.push(resetMigrations);
-
-    tests.push(() => {
+    }, resetMigrations, () => {
         console.log('\n----- testing with alternative migration directory set in config file-----');
         const args = getArgList({
             to: 'max',
         });
 
+        // eslint-disable-next-line n/no-unsupported-features/node-builtins
         return mockCwd(path.join(import.meta.dirname, 'config-with-other-directory'), async () => {
             await expect(run(args)).to.eventually.have.lengthOf(2);
             await resetMigrations({});
         });
-    });
-
-    tests.push(async () => {
+    }, async () => {
         console.log('\n----- testing empty password-----');
         const args = getArgList({
             ...options,
@@ -413,9 +361,7 @@ function buildTestsForOptions(options) {
             .to.eventually.be.an('error')
             .and.have.property('message')
             .match(/password authentication failed for user/);
-    });
-
-    tests.push(async () => {
+    }, async () => {
         console.log('\n----- testing null password asks from user when password option is empty -----');
 
         let passwordAsked = false;
@@ -437,9 +383,7 @@ function buildTestsForOptions(options) {
         await expect(run(args)).to.be.rejectedWith(Error, /password authentication failed/);
         expect(passwordAsked).to.be.true();
         readline.createInterface = originalCreateInterface;
-    });
-
-    tests.push(async () => {
+    }, async () => {
         console.log('\n----- testing that config file without password asks from user when password option is empty -----');
         const args = getArgList({
             to: 'max',
@@ -462,9 +406,7 @@ function buildTestsForOptions(options) {
         expect(passwordAsked).to.be.true();
         await resetMigrations({ config: 'test/config-without-password.json', password: null });
         readline.createInterface = originalCreateInterface;
-    });
-
-    tests.push(() => {
+    }, () => {
         console.log('\n----- testing detecting migration files with same number-----');
         const args = getArgList({
             ...options,
@@ -474,60 +416,42 @@ function buildTestsForOptions(options) {
 
         return expect(run(args))
             .to.be.rejectedWith(Error, /^Two migrations found with version 2 and action do/, 'No migration conflicts were detected');
-    });
-
-    tests.push(async () => {
+    }, async () => {
         console.log('\n----- testing using migration number at the end -----');
 
         const migrations = await run(['--config', 'test/sample-config.json', '0003']);
         expect(migrations.at(-1).version).to.equal(3);
-    });
-
-    tests.push(resetMigrations);
-
-    tests.push(() => removeVersionTable({
+    }, resetMigrations, () => removeVersionTable({
         ...options,
         driver: 'mysql',
         port: 3306,
-    }));
-
-    tests.push(async () => {
+    }), async () => {
         console.log('\n----- testing migration to 003 using mysql -----');
         const args = ['3', '--config', 'test/mysql-config.json'];
 
         return expect(run(args)).to.eventually.have.lengthOf(3).and.have.nested.property('2.version').equal(3);
-    });
-
-    tests.push(() => removeVersionTable({
+    }, () => removeVersionTable({
         ...options,
         driver: 'mssql',
         port: 1433,
         database: 'master',
         username: 'sa',
         password: 'Postgrator123!',
-    }));
-
-    tests.push(async () => {
+    }), async () => {
         console.log('\n----- testing migration to 003 using mssql -----');
         const args = ['3', '--config', 'test/mssql-config.json'];
 
         return expect(run(args)).to.eventually.have.lengthOf(3).and.have.nested.property('2.version').equal(3);
-    });
-
-    tests.push(() => removeVersionTable({
+    }, () => removeVersionTable({
         ...options,
         driver: 'sqlite3',
         database: ':memory:',
-    }));
-
-    tests.push(async () => {
+    }), async () => {
         console.log('\n----- testing migration to 003 using sqlite3 -----');
         const args = ['3', '--config', 'test/sqlite3-config.json'];
 
         return expect(run(args)).to.eventually.have.lengthOf(3).and.have.nested.property('2.version').equal(3);
-    });
-
-    tests.push(async () => {
+    }, async () => {
         console.log('\n----- testing dropping schema table-----');
         const args = getArgList({
             config: 'test/sample-config.json',
@@ -537,18 +461,15 @@ function buildTestsForOptions(options) {
         await expect(run(args)).to.eventually.have.lengthOf(0);
         return expect(run(['drop-schema', '--config', 'test/sample-config.json']))
             .to.become();
-    });
-
-    tests.push(async () => {
+    }, async () => {
         console.log('\n----- testing dropping schema table with default configuration file -----');
 
+        // eslint-disable-next-line n/no-unsupported-features/node-builtins
         return mockCwd(path.join(import.meta.dirname, 'sample-config'), async () => {
             await expect(run(['0'])).to.eventually.have.lengthOf(0);
             await expect(run(['drop-schema'])).to.become();
         });
-    });
-
-    tests.push(async () => {
+    }, async () => {
         console.log('\n----- testing dropping schema when the table name is specified explicitly -----');
         const args = getArgList({
             'schema-table': 'my-schema-table',
@@ -559,15 +480,11 @@ function buildTestsForOptions(options) {
         await expect(run(args)).to.eventually.have.lengthOf(0);
         return expect(run(['drop-schema', '--config', 'test/sample-config.json', '--schema-table', 'my-schema-table']))
             .to.become();
-    });
-
-    tests.push(() => {
+    }, () => {
         console.log('\n----- testing dropping schema table that does not exist -----');
         return expect(run(['drop-schema', '--config', 'test/sample-config.json']))
             .to.be.rejectedWith(Error, 'table "schemaversion" does not exist');
-    });
-
-    tests.push(() => {
+    }, () => {
         console.log('\n----- testing dropping schema table that does not exist -----');
         return expect(run(['drop-schema', '--config', 'test/sample-config.json']))
             .to.be.rejectedWith(Error, 'table "schemaversion" does not exist');

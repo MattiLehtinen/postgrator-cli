@@ -5,5 +5,5 @@ export default {
     port: 5432,
     database: 'postgrator',
     username: 'postgrator',
-    password: 'postgrator'
+    password: 'postgrator',
 }
