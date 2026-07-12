@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { argv } from 'node:process';
-import { run } from './lib/postgrator-cli.js';  
+import { argv } from "node:process";
+import { run } from "./lib/postgrator-cli.js";
 
 await run(argv).catch((e) => {
     console.log(`Error: ${e.message}`);
