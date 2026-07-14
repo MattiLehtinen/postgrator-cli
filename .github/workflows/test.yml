@@ -1,65 +1,65 @@
 name: test
 on:
-  push:
-    branches:
-      - master
-  pull_request:
+    push:
+        branches:
+            - master
+    pull_request:
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
+    test:
+        runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version:
-          - 20.x
-          - 22.x
-          - 24.x
-          - 26.x
-        mssql-version:
-          - ^7.0.0
-          - ^8.0.0
-          - ^9.0.0
-          - ^10.0.0
-          - ^11.0.0
+        strategy:
+            matrix:
+                node-version:
+                    - 20.x
+                    - 22.x
+                    - 24.x
+                    - 26.x
+                mssql-version:
+                    - ^7.0.0
+                    - ^8.0.0
+                    - ^9.0.0
+                    - ^10.0.0
+                    - ^11.0.0
 
-    steps:
-      - uses: actions/checkout@v7
+        steps:
+            - uses: actions/checkout@v7
 
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ matrix.node-version }}
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v6
+              with:
+                  node-version: ${{ matrix.node-version }}
 
-      - name: Install dependencies
-        uses: bahmutov/npm-install@v1
+            - name: Install dependencies
+              uses: bahmutov/npm-install@v1
 
-      - name: Install mssql
-        run: npm install --no-save mssql@${{ matrix.mssql-version }}
+            - name: Install mssql
+              run: npm install --no-save mssql@${{ matrix.mssql-version }}
 
-      - name: Lint
-        run: npm run lint
+            - name: Lint
+              run: npm run lint
 
-      - name: Start databases
-        uses: hoverkraft-tech/compose-action@v3.0.0
+            - name: Start databases
+              uses: hoverkraft-tech/compose-action@v3.0.0
 
-      - name: Wait for databases to be available
-        run: sleep 10
+            - name: Wait for databases to be available
+              run: sleep 10
 
-      - name: Test
-        run: npm run cover
+            - name: Test
+              run: npm run cover
 
-      - name: Publish to coveralls.io
-        uses: coverallsapp/github-action@master
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          parallel: true
+            - name: Publish to coveralls.io
+              uses: coverallsapp/github-action@master
+              with:
+                  github-token: ${{ secrets.GITHUB_TOKEN }}
+                  parallel: true
 
-  finish:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-      - name: Close parallel build
-        uses: coverallsapp/github-action@v2
-        with:
-          parallel-finished: true
+    finish:
+        needs: test
+        runs-on: ubuntu-latest
+        steps:
+            - name: Close parallel build
+              uses: coverallsapp/github-action@v2
+              with:
+                  parallel-finished: true

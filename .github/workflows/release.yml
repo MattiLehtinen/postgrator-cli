@@ -1,36 +1,35 @@
 name: release
 on:
-  release:
-    types: [published]
+    release:
+        types: [published]
 
 jobs:
-  publish:
+    publish:
+        runs-on: ubuntu-latest
 
-    runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v7
 
-    steps:
-    - uses: actions/checkout@v7
+            - name: Use Node.js
+              uses: actions/setup-node@v6
+              with:
+                  registry-url: "https://registry.npmjs.org"
 
-    - name: Use Node.js
-      uses: actions/setup-node@v6
-      with:
-        registry-url: 'https://registry.npmjs.org'
+            - name: Install dependencies
+              uses: bahmutov/npm-install@v1
 
-    - name: Install dependencies
-      uses: bahmutov/npm-install@v1
+            - name: Lint
+              run: npm run lint
 
-    - name: Lint
-      run: npm run lint
+            - name: Start databases
+              uses: hoverkraft-tech/compose-action@v3.0.0
 
-    - name: Start databases
-      uses: hoverkraft-tech/compose-action@v3.0.0
+            - name: Wait for databases to be available
+              run: sleep 10
 
-    - name: Wait for databases to be available
-      run: sleep 10
+            - name: Test
+              run: npm test
 
-    - name: Test
-      run: npm test
-
-    - run: npm publish
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+            - run: npm publish
+              env:
+                  NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
