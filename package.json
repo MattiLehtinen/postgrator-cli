@@ -62,7 +62,7 @@
         "chai-as-promised": "^8.0.2",
         "crlf": "^1.1.1",
         "dirty-chai": "^3.0.0",
-        "eslint": "^9.39.5",
+        "eslint": "^10.7.0",
         "eslint-config-prettier": "^10.1.8",
         "eslint-plugin-import": "^2.32.0",
         "eslint-plugin-n": "^18.2.2",
