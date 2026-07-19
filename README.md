@@ -14,7 +14,7 @@ Uses [Postgrator](https://github.com/rickbergfalk/postgrator) node.js library de
 
 ## Installation
 
-*As of postgrator-cli 10 Node.js version 22.13 or greater is required (sqlite3 support is provided by the built-in `node:sqlite` module)*
+*As of postgrator-cli 10 Node.js version 22.16, or 24.0 or greater is required (sqlite3 support is provided by the built-in `node:sqlite` module)*
 
 ```
 npm install -g postgrator-cli
