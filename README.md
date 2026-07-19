@@ -14,7 +14,7 @@ Uses [Postgrator](https://github.com/rickbergfalk/postgrator) node.js library de
 
 ## Installation
 
-*As of postgrator-cli 6 Node.js version 14 or greater is required*
+*As of postgrator-cli 10 Node.js version 22.13 or greater is required (sqlite3 support is provided by the built-in `node:sqlite` module)*
 
 ```
 npm install -g postgrator-cli
@@ -32,7 +32,6 @@ And install the appropriate DB engine(s) if not installed yet:
 npm install pg@8
 npm install mysql@2
 npm install mssql@6
-npm install sqlite3@5
 ```
 
 See the [Postgrator](https://github.com/rickbergfalk/postgrator) documentation for more information about the supported engines.
