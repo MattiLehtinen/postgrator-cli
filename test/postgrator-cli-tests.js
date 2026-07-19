@@ -53,6 +53,41 @@ async function removeVersionTable(options) {
     return client.end();
 }
 
+async function assertMultiStatementMigrationsApplied(client) {
+    // `animal` is created alongside `person` in the same (two-statement) 001.do.sql script,
+    // so this table only exists if every statement in the script was executed, not just the first one.
+    const { rows: animalRows } = await client.query("SELECT * FROM animal");
+    // `003.do.sql` inserts both `sally` and `millie` in a single (two-statement) script.
+    const { rows: personRows } = await client.query(
+        "SELECT name FROM person ORDER BY name",
+    );
+
+    expect(animalRows).to.deep.equal([]);
+    expect(personRows.map((row) => row.name)).to.deep.equal([
+        "fred",
+        "millie",
+        "sally",
+    ]);
+}
+
+async function connectAndAssertMultiStatementMigrationsApplied(options) {
+    const config = {
+        driver: options.driver,
+        host: options.host,
+        port: options.port,
+        database: options.database,
+        username: options.username,
+        password: options.password,
+    };
+    console.log(
+        `\n----- ${config.driver} checking that multi-statement migration scripts fully executed -----`,
+    );
+    const client = await getClient(config.driver, config);
+    await client.connect();
+    await assertMultiStatementMigrationsApplied(client);
+    return client.end();
+}
+
 function getDefaultOptions() {
     return parse();
 }
@@ -124,6 +159,7 @@ function buildTestsForOptions(options) {
                 .and.have.nested.property("2.version")
                 .equal(3);
         },
+        () => connectAndAssertMultiStatementMigrationsApplied(options),
         async () => {
             console.log(
                 "\n----- testing migration to 000 with conflict detection-----",
@@ -618,6 +654,12 @@ function buildTestsForOptions(options) {
                 .equal(3);
         },
         () =>
+            connectAndAssertMultiStatementMigrationsApplied({
+                ...options,
+                driver: "mysql",
+                port: 3306,
+            }),
+        () =>
             removeVersionTable({
                 ...options,
                 driver: "mssql",
@@ -636,6 +678,15 @@ function buildTestsForOptions(options) {
                 .equal(3);
         },
         () =>
+            connectAndAssertMultiStatementMigrationsApplied({
+                ...options,
+                driver: "mssql",
+                port: 1433,
+                database: "master",
+                username: "sa",
+                password: "Postgrator123!",
+            }),
+        () =>
             removeVersionTable({
                 ...options,
                 driver: "sqlite3",
@@ -649,6 +700,30 @@ function buildTestsForOptions(options) {
                 .to.eventually.have.lengthOf(3)
                 .and.have.nested.property("2.version")
                 .equal(3);
+        },
+        async () => {
+            console.log(
+                "\n----- testing sqlite3 migration files with multiple SQL commands are fully executed -----",
+            );
+            // Unlike connectAndAssertMultiStatementMigrationsApplied, this can't reconnect after migrating to
+            // check the result: a `:memory:` database only lives as long as its connection, so migrate and
+            // assert on the same client.
+            const client = await getClient("sqlite3", { database: ":memory:" });
+            await client.connect();
+            const { default: Postgrator } = await import("postgrator");
+            const pg = new Postgrator({
+                migrationPattern: "test/migrations/*",
+                driver: "sqlite3",
+                execQuery: client.query,
+                execSqlScript: client.execSqlScript,
+            });
+
+            await expect(pg.migrate("3"))
+                .to.eventually.have.lengthOf(3)
+                .and.have.nested.property("2.version")
+                .equal(3);
+            await assertMultiStatementMigrationsApplied(client);
+            await client.end();
         },
         async () => {
             console.log("\n----- testing dropping schema table-----");
