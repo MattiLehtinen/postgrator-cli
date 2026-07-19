@@ -215,7 +215,6 @@ function buildTestsForOptions(options) {
             });
 
             return mockCwd(
-                // eslint-disable-next-line n/no-unsupported-features/node-builtins
                 path.join(import.meta.dirname, "sample-config"),
                 async () => {
                     await expect(run(args)).to.eventually.containSubset({
@@ -236,7 +235,6 @@ function buildTestsForOptions(options) {
             });
 
             return mockCwd(
-                // eslint-disable-next-line n/no-unsupported-features/node-builtins
                 path.join(import.meta.dirname, "sample-config-esm"),
                 async () => {
                     await expect(run(args)).to.eventually.containSubset({
@@ -257,7 +255,6 @@ function buildTestsForOptions(options) {
             });
 
             return mockCwd(
-                // eslint-disable-next-line n/no-unsupported-features/node-builtins
                 path.join(import.meta.dirname, "sample-config-cjs"),
                 async () => {
                     await expect(run(args)).to.eventually.containSubset({
@@ -278,7 +275,6 @@ function buildTestsForOptions(options) {
             });
 
             return mockCwd(
-                // eslint-disable-next-line n/no-unsupported-features/node-builtins
                 path.join(import.meta.dirname, "multi-patterns-config"),
                 async () => {
                     await expect(run(args)).to.eventually.containSubset({
@@ -303,7 +299,6 @@ function buildTestsForOptions(options) {
             });
 
             return mockCwd(
-                // eslint-disable-next-line n/no-unsupported-features/node-builtins
                 path.join(import.meta.dirname, "multi-patterns-config"),
                 async () => {
                     await expect(run(args)).to.eventually.containSubset([
@@ -321,9 +316,8 @@ function buildTestsForOptions(options) {
                 to: "06",
 
                 "migration-pattern": [
-                    // eslint-disable-next-line n/no-unsupported-features/node-builtins
                     path.join(import.meta.dirname, "migrations/*"),
-                    // eslint-disable-next-line n/no-unsupported-features/node-builtins
+
                     path.join(import.meta.dirname, "seeds/*"),
                 ],
             });
@@ -346,9 +340,8 @@ function buildTestsForOptions(options) {
                 to: "02",
 
                 "migration-pattern": [
-                    // eslint-disable-next-line n/no-unsupported-features/node-builtins
                     path.join(import.meta.dirname, "migrations/*"),
-                    // eslint-disable-next-line n/no-unsupported-features/node-builtins
+
                     path.join(import.meta.dirname, "seeds/*"),
                 ],
             });
@@ -405,7 +398,6 @@ function buildTestsForOptions(options) {
             );
             const args = getArgList({
                 config: path.resolve(
-                    // eslint-disable-next-line n/no-unsupported-features/node-builtins
                     import.meta.dirname,
                     "./sample-config.json",
                 ),
@@ -419,7 +411,6 @@ function buildTestsForOptions(options) {
             );
 
             return mockCwd(
-                // eslint-disable-next-line n/no-unsupported-features/node-builtins
                 path.join(import.meta.dirname, "sample-config"),
                 async () => {
                     await expect(run()).to.eventually.have.lengthOf(0);
@@ -435,7 +426,6 @@ function buildTestsForOptions(options) {
                 username: "invaliduser",
 
                 config: path.resolve(
-                    // eslint-disable-next-line n/no-unsupported-features/node-builtins
                     import.meta.dirname,
                     "./sample-config.json",
                 ),
@@ -497,7 +487,6 @@ function buildTestsForOptions(options) {
 
             return mockCwd(
                 path.join(
-                    // eslint-disable-next-line n/no-unsupported-features/node-builtins
                     import.meta.dirname,
                     "config-with-non-existing-directory",
                 ),
@@ -522,7 +511,6 @@ function buildTestsForOptions(options) {
             });
 
             return mockCwd(
-                // eslint-disable-next-line n/no-unsupported-features/node-builtins
                 path.join(import.meta.dirname, "config-with-other-directory"),
                 async () => {
                     await expect(run(args)).to.eventually.have.lengthOf(2);
@@ -743,7 +731,6 @@ function buildTestsForOptions(options) {
             );
 
             return mockCwd(
-                // eslint-disable-next-line n/no-unsupported-features/node-builtins
                 path.join(import.meta.dirname, "sample-config"),
                 async () => {
                     await expect(run(["0"])).to.eventually.have.lengthOf(0);
