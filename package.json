@@ -1,6 +1,6 @@
 {
     "name": "postgrator-cli",
-    "version": "9.1.1",
+    "version": "10.0.0",
     "description": "Command line interface for Postgrator",
     "author": "Matti Lehtinen <matlehti@gmail.com> (https://twitter.com/MattiLehtinen)",
     "type": "module",
