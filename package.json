@@ -74,7 +74,7 @@
         "mysql": "^2.18.1",
         "p-each-series": "^3.0.0",
         "p-event": "^7.1.0",
-        "pg": "^8.22.0",
+        "pg": "^8.23.0",
         "prettier": "3.9.5"
     },
     "peerDependencies": {
