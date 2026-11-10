@@ -67,7 +67,7 @@
         "eslint-plugin-import": "^2.32.0",
         "eslint-plugin-n": "^18.5.0",
         "eslint-plugin-prettier": "^5.5.7",
-        "eslint-plugin-unicorn": "^65.0.1",
+        "eslint-plugin-unicorn": "^79.0.0",
         "eslint-plugin-yml": "^3.10.0",
         "mock-cwd": "^1.0.0",
         "mssql": "^12.7.14",
